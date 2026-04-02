@@ -5,7 +5,6 @@ body {
   padding: 0;
 }
 
-
 /* Layout container */
 .start-container {
   display: flex;
@@ -30,7 +29,7 @@ body {
 
 /* style for C */
 .title .parenthese {
-  color: rgb(209, 176, 176);
+  color: rgba(18, 3, 3, 0.425);
 }
 
 /* Input wrapper */
@@ -77,6 +76,7 @@ body {
   border: none;
   cursor: pointer;
   padding: 0;
+  z-index: 3;
 }
 
 .copy-btn img {
@@ -165,11 +165,6 @@ body {
     transform: rotate(360deg);
   }
 }
-
-
-
-
-
 
 /* buttons */
 .button-group {
