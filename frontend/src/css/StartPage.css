@@ -1,0 +1,232 @@
+body {
+  background-color: rgb(16, 16, 16);
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+/* Layout container */
+.start-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 80px;
+  color: rgb(143, 6, 6);
+  font-family: 'Inter', sans-serif;
+}
+
+/* Title */
+.title {
+  font-size: 48px;
+  font-weight: 700;
+  color: rgb(136, 22, 22);
+  letter-spacing: 1px;
+  text-shadow:
+    0 0 10px rgba(153, 12, 12, 0.6),
+    0 0 20px rgba(235, 18, 18, 0.4),
+    0 0 40px rgba(70, 4, 4, 0.2);
+}
+
+/* style for C */
+.title .parenthese {
+  color: rgba(18, 3, 3, 0.425);
+}
+
+.tag-line {
+  color: rgb(136, 22, 22);
+  font-size: 18px;
+  letter-spacing: 1px;
+  margin-top: 10px;
+  text-shadow:
+    0 0 6px rgba(70, 11, 11, 0.7),
+    0 0 12px rgba(255, 0, 0, 0.5),
+    0 0 20px rgba(255, 0, 0, 0.3);
+}
+
+/* Input wrapper */
+.input-wrapper {
+  position: relative;
+  margin-top: 20px;
+  width: 100%;
+}
+
+.form-section {
+  margin-top: 120px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 280px;
+}
+
+/* Input field for game id */
+.game-id {
+  width: 100%;
+  padding: 14px 0px 14px 14px;
+  font-size: 18px;
+  border-radius: 10px;
+  border: 3px solid rgb(8, 45, 158);
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.game-id::placeholder {
+  color: #807676;
+}
+
+.game-id:focus {
+  border-color: rgb(52, 96, 227);
+}
+
+/* Copy button */
+.copy-btn {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  z-index: 3;
+}
+
+.copy-btn img {
+  width: 18px;
+  height: 18px;
+}
+
+/* Username input */
+.username-input {
+  width: 100%;
+  padding: 14px 0px 14px 14px;
+  font-size: 18px;
+  border-radius: 10px;
+  border: 3px solid rgb(8, 45, 158);
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.username-input::placeholder {
+  color: #807676;
+}
+
+.username-input:focus {
+  border-color: rgb(52, 96, 227);
+}
+
+.neon-border {
+  position: relative;
+  padding: 2px;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow:
+    0 0 12px rgba(44, 55, 154, 0.6),
+    0 0 25px rgba(58, 62, 107, 0.4),
+    0 0 45px rgba(234, 234, 238, 0.2);
+}
+
+.neon-border::before {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: conic-gradient(from 0deg,
+      #ff0000,
+      #ff7300,
+      #fffb00,
+      #48ff00,
+      #00ffd5,
+      #002bff,
+      #7a00ff,
+      #ff00c8,
+      #ff0000);
+  animation: spin 7s linear infinite;
+  filter: blur(10px);
+}
+
+.neon-border::after {
+  content: "";
+  position: absolute;
+  inset: 4px;
+  background: rgb(20, 20, 20);
+  border-radius: 10px;
+  z-index: 1;
+}
+
+.neon-border input {
+  position: relative;
+  z-index: 2;
+  background: transparent;
+  border: none;
+  color: white;
+  width: 100%;
+  padding: 14px;
+  font-size: 18px;
+  outline: none;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* buttons */
+.button-group {
+  margin-top: 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.btn {
+  padding: 14px 28px;
+  font-size: 18px;
+  border-radius: 8px;
+  cursor: pointer;
+  border: none;
+  width: 200px;
+  border: 3px solid rgb(10, 84, 16);
+  transition: background-color 0.2s ease, transform 0.1s ease;
+  /* Outside glow */
+  box-shadow:
+    0 0 10px rgba(5, 223, 41, 0.4),
+    0 0 20px rgba(10, 108, 13, 0.25),
+    0 0 40px rgba(12, 192, 42, 0.4);
+  /* Inside glow */
+  box-shadow:
+    inset 0 0 8px rgba(11, 202, 36, 0.4),
+    inset 0 0 15px rgba(10, 112, 24, 0.2),
+    0 0 10px rgba(25, 234, 53, 0.4),
+    0 0 20px rgba(26, 160, 44, 0.25),
+    0 0 40px rgba(31, 228, 57, 0.15);
+}
+
+/* Start game button */
+.btn.Start {
+  background-color: rgb(224, 232, 224);
+  color: rgb(0, 0, 0);
+}
+
+.btn.Start:hover {
+  background-color: rgb(44, 221, 44);
+  transform: translateY(-5px);
+}
+
+
+/* Join game button */
+.btn.joining {
+  background-color: rgb(224, 232, 224);
+  color: rgb(0, 0, 0);
+}
+
+.btn.joining:hover {
+  background-color: rgb(44, 221, 44);
+  transform: translateY(-5px);
+}
