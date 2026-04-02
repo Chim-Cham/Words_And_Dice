@@ -1,0 +1,113 @@
+body {
+  background-color: black;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+
+/* Layout container */
+.start-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 120px;
+  color: rgb(143, 6, 6);
+  font-family: 'Inter', sans-serif;
+}
+
+/* Title */
+.title {
+  font-size: 48px;
+  font-weight: 700;
+  color: rgb(136, 22, 22);
+  letter-spacing: 1px;
+}
+
+/* style for C */
+.title .parenthese {
+  color: rgb(209, 176, 176);
+}
+
+/* Input wrapper */
+.input-wrapper {
+  position: relative;
+  margin-top: 100px;
+}
+
+/* Input field for game id */
+.game-id {
+  width: 100%;
+  padding: 14px 45px 14px 14px;
+  font-size: 18px;
+  border-radius: 10px;
+  border: 2px solid rgb(8, 45, 158);
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.game-id::placeholder {
+  color: #807676;
+}
+
+.game-id:focus {
+  border-color: rgb(52, 96, 227);
+}
+
+/* Copy button */
+.copy-btn {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+.copy-btn img {
+  width: 18px;
+  height: 18px;
+}
+
+/* buttons */
+.button-group {
+  margin-top: 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.btn {
+  padding: 14px 28px;
+  font-size: 18px;
+  border-radius: 8px;
+  cursor: pointer;
+  border: none;
+  width: 200px;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+/* Start game button */
+.btn.Start {
+  background-color: rgb(224, 232, 224);
+  color: rgb(0, 0, 0);
+}
+
+.btn.Start:hover {
+  background-color: rgb(44, 221, 44);
+  transform: translateY(-5px);
+}
+
+
+/* Join game button */
+.btn.joining {
+  background-color: rgb(224, 232, 224);
+  color: rgb(0, 0, 0);
+}
+
+.btn.joining:hover {
+  background-color: rgb(44, 221, 44);
+  transform: translateY(-5px);
+}
