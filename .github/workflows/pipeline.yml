@@ -22,14 +22,11 @@ jobs:
         with:
           dotnet-version: '10.0.x'
 
-      # 1. Restore på SOLUTION-nivån (hämtar ALLA paket, även xUnit)
       - name: Restore dependencies
         run: dotnet restore Words_And_Dice.sln
 
-      # 2. Build på SOLUTION-nivån
       - name: Build
         run: dotnet build Words_And_Dice.sln --configuration Release --no-restore
 
-      # 3. Kör testerna via SOLUTION-filen
       - name: Test
-        run: dotnet test Words_And_Dice.sln --configuration Release --no-build --verbosity normal
+        run: dotnet test Words_And_Dice.sln --configuration Release --no-build
