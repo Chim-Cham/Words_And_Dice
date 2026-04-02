@@ -30,10 +30,18 @@ jobs:
         working-directory: ./backend
         run: dotnet restore
 
+      # - name: Build
+      #   working-directory: ./backend
+      #   run: dotnet build --no-restore
+
       - name: Build
         working-directory: ./backend
-        run: dotnet build --no-restore
-
+        run: dotnet build --configuration Release
+      
       - name: Test
         working-directory: ./backend
-        run: dotnet test --no-build --verbosity normal
+        run: dotnet test --configuration Release --no-build --verbosity normal
+        
+      # - name: Test
+      #   working-directory: ./backend
+      #   run: dotnet test --no-build --verbosity normal
