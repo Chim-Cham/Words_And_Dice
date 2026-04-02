@@ -33,3 +33,6 @@ dist-ssr
 backend/db-config.json
 backend/obj/
 backend/bin/
+
+**/bin/
+**/obj/
