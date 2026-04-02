@@ -20,28 +20,16 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '10.0.x' 
-      
-      - name: Clean
-        working-directory: ./backend
-        run: dotnet clean
+          dotnet-version: '10.0.x'
 
+      # 1. Restore på SOLUTION-nivån (hämtar ALLA paket, även xUnit)
       - name: Restore dependencies
-        working-directory: ./backend
-        run: dotnet restore
+        run: dotnet restore Words_And_Dice.sln
 
-      # - name: Build
-      #   working-directory: ./backend
-      #   run: dotnet build --no-restore
-
+      # 2. Build på SOLUTION-nivån
       - name: Build
-        working-directory: ./backend
-        run: dotnet build --configuration Release
-      
+        run: dotnet build Words_And_Dice.sln --configuration Release --no-restore
+
+      # 3. Kör testerna via SOLUTION-filen
       - name: Test
-        working-directory: ./backend
-        run: dotnet test --configuration Release --no-build --verbosity normal
-        
-      # - name: Test
-      #   working-directory: ./backend
-      #   run: dotnet test --no-build --verbosity normal
+        run: dotnet test Words_And_Dice.sln --configuration Release --no-build --verbosity normal
