@@ -3,7 +3,7 @@
 # + sessions will be stored in it in some examples
 # if the live.db is missing the backend will create it
 # from template.db
-backend/databases/live.sqlite3
+
 
 # Logs
 logs
@@ -20,6 +20,7 @@ dist-ssr
 *.local
 
 # Editor directories and files
+.vs/
 .vscode/*
 !.vscode/extensions.json
 .idea
@@ -30,6 +31,10 @@ dist-ssr
 *.sln
 *.sw?
 
+
+backend/databases/live.sqlite3
 backend/db-config.json
-backend/obj/
-backend/bin/
+*.user
+*.sln.docuser
+**/bin/
+**/obj/
