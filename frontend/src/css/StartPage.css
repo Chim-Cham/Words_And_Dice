@@ -1,5 +1,5 @@
 body {
-  background-color: black;
+  background-color: rgb(20, 20, 20);
   height: 100%;
   margin: 0;
   padding: 0;
@@ -11,7 +11,7 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-top: 120px;
+  margin-top: 80px;
   color: rgb(143, 6, 6);
   font-family: 'Inter', sans-serif;
 }
@@ -32,13 +32,22 @@ body {
 /* Input wrapper */
 .input-wrapper {
   position: relative;
-  margin-top: 100px;
+  margin-top: 20px;
+  width: 100%;
+}
+
+.form-section {
+  margin-top: 120px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 280px;
 }
 
 /* Input field for game id */
 .game-id {
   width: 100%;
-  padding: 14px 45px 14px 14px;
+  padding: 14px 0px 14px 14px;
   font-size: 18px;
   border-radius: 10px;
   border: 2px solid rgb(8, 45, 158);
@@ -70,6 +79,26 @@ body {
   width: 18px;
   height: 18px;
 }
+
+/* Username input */
+.username-input {
+  width: 100%;
+  padding: 14px 0px 14px 14px;
+  font-size: 18px;
+  border-radius: 10px;
+  border: 2px solid rgb(8, 45, 158);
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.username-input::placeholder {
+  color: #807676;
+}
+
+.username-input:focus {
+  border-color: rgb(52, 96, 227);
+}
+
 
 /* buttons */
 .button-group {
