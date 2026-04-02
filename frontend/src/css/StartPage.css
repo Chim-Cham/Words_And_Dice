@@ -32,6 +32,17 @@ body {
   color: rgba(18, 3, 3, 0.425);
 }
 
+.tag-line {
+  color: rgb(136, 22, 22);
+  font-size: 18px;
+  letter-spacing: 1px;
+  margin-top: 10px;
+  text-shadow:
+    0 0 6px rgba(70, 11, 11, 0.7),
+    0 0 12px rgba(255, 0, 0, 0.5),
+    0 0 20px rgba(255, 0, 0, 0.3);
+}
+
 /* Input wrapper */
 .input-wrapper {
   position: relative;
