@@ -8,7 +8,7 @@ export function StartPage() {
       <p className="tag-line">A challenging word game for 2 players</p>
 
       <div className="form-section">
-        <div className="input-wrapper">
+        <div className="input-wrapper neon-border">
           <input
             type="text"
             placeholder="Game ID"
@@ -19,7 +19,7 @@ export function StartPage() {
           </button>
         </div>
 
-        <div className="input-wrapper">
+        <div className="input-wrapper neon-border">
           <input
             type="text"
             placeholder="Username"

@@ -54,7 +54,7 @@ body {
   padding: 14px 0px 14px 14px;
   font-size: 18px;
   border-radius: 10px;
-  border: 2px solid rgb(8, 45, 158);
+  border: 3px solid rgb(8, 45, 158);
   outline: none;
   transition: border-color 0.2s ease;
 }
@@ -90,7 +90,7 @@ body {
   padding: 14px 0px 14px 14px;
   font-size: 18px;
   border-radius: 10px;
-  border: 2px solid rgb(8, 45, 158);
+  border: 3px solid rgb(8, 45, 158);
   outline: none;
   transition: border-color 0.2s ease;
 }
@@ -102,6 +102,73 @@ body {
 .username-input:focus {
   border-color: rgb(52, 96, 227);
 }
+
+.neon-border {
+  position: relative;
+  padding: 2px;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow:
+    0 0 12px rgba(44, 55, 154, 0.6),
+    0 0 25px rgba(58, 62, 107, 0.4),
+    0 0 45px rgba(234, 234, 238, 0.2);
+}
+
+.neon-border::before {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: conic-gradient(from 0deg,
+      #ff0000,
+      #ff7300,
+      #fffb00,
+      #48ff00,
+      #00ffd5,
+      #002bff,
+      #7a00ff,
+      #ff00c8,
+      #ff0000);
+  animation: spin 7s linear infinite;
+  filter: blur(10px);
+}
+
+.neon-border::after {
+  content: "";
+  position: absolute;
+  inset: 4px;
+  background: rgb(20, 20, 20);
+  border-radius: 10px;
+  z-index: 1;
+}
+
+.neon-border input {
+  position: relative;
+  z-index: 2;
+  background: transparent;
+  border: none;
+  color: white;
+  width: 100%;
+  padding: 14px;
+  font-size: 18px;
+  outline: none;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+
+
+
 
 
 /* buttons */
@@ -119,6 +186,7 @@ body {
   cursor: pointer;
   border: none;
   width: 200px;
+  border: 3px solid rgb(10, 84, 16);
   transition: background-color 0.2s ease, transform 0.1s ease;
   /* Outside glow */
   box-shadow:
