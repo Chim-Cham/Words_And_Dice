@@ -1,5 +1,5 @@
 body {
-  background-color: rgb(20, 20, 20);
+  background-color: rgb(16, 16, 16);
   height: 100%;
   margin: 0;
   padding: 0;
@@ -23,9 +23,9 @@ body {
   color: rgb(136, 22, 22);
   letter-spacing: 1px;
   text-shadow:
-    0 0 10px rgba(255, 0, 0, 0.6),
-    0 0 20px rgba(255, 0, 0, 0.4),
-    0 0 40px rgba(255, 0, 0, 0.2);
+    0 0 10px rgba(153, 12, 12, 0.6),
+    0 0 20px rgba(235, 18, 18, 0.4),
+    0 0 40px rgba(70, 4, 4, 0.2);
 }
 
 /* style for C */
@@ -120,6 +120,18 @@ body {
   border: none;
   width: 200px;
   transition: background-color 0.2s ease, transform 0.1s ease;
+  /* Outside glow */
+  box-shadow:
+    0 0 10px rgba(5, 223, 41, 0.4),
+    0 0 20px rgba(10, 108, 13, 0.25),
+    0 0 40px rgba(12, 192, 42, 0.4);
+  /* Inside glow */
+  box-shadow:
+    inset 0 0 8px rgba(11, 202, 36, 0.4),
+    inset 0 0 15px rgba(10, 112, 24, 0.2),
+    0 0 10px rgba(25, 234, 53, 0.4),
+    0 0 20px rgba(26, 160, 44, 0.25),
+    0 0 40px rgba(31, 228, 57, 0.15);
 }
 
 /* Start game button */
