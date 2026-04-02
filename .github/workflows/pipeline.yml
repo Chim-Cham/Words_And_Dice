@@ -1,0 +1,36 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - dev
+  pull_request:
+    branches:
+      - dev
+
+jobs:
+  build-and-test-backend:
+    name: Build and Test .NET Backend
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x' 
+
+      - name: Restore dependencies
+        working-directory: ./backend
+        run: dotnet restore
+
+      - name: Build
+        working-directory: ./backend
+        run: dotnet build --no-restore
+
+      # 5. Kör era enhetstester (xUnit/Moq)
+      - name: Test
+        working-directory: ./backend
+        run: dotnet test --no-build --verbosity normal
