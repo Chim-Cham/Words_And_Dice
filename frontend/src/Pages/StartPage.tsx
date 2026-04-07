@@ -1,7 +1,9 @@
 import "../css/StartPage.css";
 import copyIcon from "../assets/copy.svg";
 
-export function StartPage() {
+type StartPageProps = {onStartGame: () => void;};
+
+export function StartPage({ onStartGame }: StartPageProps) {
   return (
     <div className="start-container">
       <h1 className="title">Words & Di<span className="parenthese">c</span>e</h1>
@@ -28,7 +30,7 @@ export function StartPage() {
         </div>
 
         <div className="button-group">
-          <button className="btn Start">Start Game</button>
+          <button className="btn Start" type="button" onClick={onStartGame}>Start Game</button>
           <button className="btn joining">Join the Game</button>
         </div>
       </div>
