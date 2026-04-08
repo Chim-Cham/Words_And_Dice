@@ -8,18 +8,37 @@ type GamePageProps = { onBack: () => void; };
 export function GamePage({ onBack }: GamePageProps) {
   const [showInstructions, setShowInstructions] = useState(false);
 
-  // Endast enkel UI-demo just nu
+  // Random ord väljaren
+  const [currentWord] = useState(() => {
+    const randomIndex = Math.floor(Math.random() * WORDS.length);
+    return WORDS[randomIndex];
+  });
+
+  // Tar fram två "ledtrådar"
+  function generateWordSlots(word: string) {
+    const letters = word.toUpperCase().split("");
+
+    const revealedIndexes = new Set<number>();
+    while (revealedIndexes.size < 2) {
+      revealedIndexes.add(Math.floor(Math.random() * letters.length));
+    }
+
+    return letters.map((letter, index) =>
+      revealedIndexes.has(index) ? letter : ""
+    );
+  }
+
+  const [wordSlots] = useState(() => generateWordSlots(currentWord.word));
+  const wordLength = currentWord.length;
+
+  // Detta är samma som innan
   const level = 1;
-  const category = "Animals";
+  const category = currentWord.category;
   const isPlayerTurn = true;
   const playerPoints = 0;
   const maxScore = 5;
-  const missingLetter = "A";
-
-  // Exempelordet är CAT där C och T saknas
-  const wordSlots = ["C", "A", "T"];
-  const wordLength = wordSlots.length;
   const canUseHint = playerPoints >= wordLength;
+
 
   return (
     <div className="game-page">
@@ -72,12 +91,12 @@ export function GamePage({ onBack }: GamePageProps) {
 
           <div className="word-area">
             <div className="word-blank-slots">
-              {wordSlots.map((letter, index) => (
+              {wordSlots.map((letter, index) => ( // Var tvungen att ändra denna div:n
                 <div
                   key={index}
-                  className={`word-blank-slot${letter === missingLetter ? " word-blank-slot--given" : ""}`}
+                  className={`word-blank-slot${letter ? " word-blank-slot--given" : ""}`}
                 >
-                  {letter === missingLetter ? missingLetter : ""}
+                  {letter}
                 </div>
               ))}
             </div>
