@@ -30,3 +30,6 @@ jobs:
 
       - name: Test
         run: dotnet test Words_And_Dice.sln --configuration Release --no-build
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
