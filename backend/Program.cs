@@ -20,13 +20,11 @@ app.UseCors("AllowAll");
 app.DebugStart();
 
 /*Real API*/
-
-// Create game
+// Create game enpoint
 app.CreateGameStart();
-
-// Join game
+// Join gameenpoint
 app.JoinGameStart();
-
+//Util and admin endpoints 
 app.UtilApiStart();
 
 
