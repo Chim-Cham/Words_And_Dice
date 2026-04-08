@@ -1,4 +1,4 @@
-
+import "../css/DiceWordRow.css"
 import { useState, useEffect } from "react";
 
 const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZÅÄÖ";
