@@ -13,8 +13,10 @@ public static class SupabaseConfig
         {
             if (_instance == null)
             {
-                DotEnv.Load(options: new DotEnvOptions(envFilePaths: new[] { "db-config.env" }));
-
+                if (File.Exists("db-config.env"))
+                {
+                    dotenv.net.DotEnv.Load(options: new dotenv.net.DotEnvOptions(envFilePaths: new[] { "db-config.env" }));
+                }
                 LoadedUrl = Environment.GetEnvironmentVariable("SUPABASE_URL");
                 LoadedKey = Environment.GetEnvironmentVariable("SUPABASE_KEY");
 
