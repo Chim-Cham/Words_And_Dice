@@ -38,5 +38,7 @@ backend/db-config.json
 *.sln.docuser
 **/bin/
 **/obj/
-.env
 
+backend/*.env
+*.env
+db-config.env
