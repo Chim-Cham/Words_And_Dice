@@ -36,37 +36,50 @@
 
 .info-box {
   width: 100%;
+  background: rgba(20, 20, 20, 0.85);
+  padding: 18px 20px;
+  border-radius: 12px;
+  box-shadow:
+    0 0 10px rgba(255, 0, 0, 0.25),
+    0 0 25px rgba(255, 0, 0, 0.15);
+  border: 1px solid rgba(255, 0, 0, 0.3);
 }
 
 .info-label {
-  color: rgb(200, 200, 200);
-  margin-bottom: 6px;
+  color: rgb(255, 120, 120);
+  font-size: 14px;
+  margin-bottom: 8px;
+  letter-spacing: 1px;
 }
 
 .info-row {
   display: flex;
   align-items: center;
-  gap: 10px;
+  justify-content: space-between;
 }
 
 .info-value {
   color: white;
-  font-size: 16px;
+  font-size: 17px;
+  font-weight: 500;
   word-break: break-all;
+  max-width: 85%;
 }
 
 .copy-btn {
   background: none;
   border: none;
   cursor: pointer;
-  padding: 0;
+  padding: 4px;
+  transition: transform 0.15s ease;
 }
 
 .copy-btn img {
-  width: 18px;
-  height: 18px;
+  width: 20px;
+  height: 20px;
+  filter: drop-shadow(0 0 4px rgba(255, 0, 0, 0.6));
 }
 
 .button-group {
-  margin-top: 20px;
+  transform: scale(1.15);
 }
