@@ -14,8 +14,8 @@ export function GamePage({ onBack }: GamePageProps) {
   const maxScore = 5;
   const missingLetter = "A";
 
-  // Exempelordet är CAT där A saknas
-  const wordSlots = ["C", "", "T"];
+  // Exempelordet är CAT där C och T saknas
+  const wordSlots = ["C", "A", "T"];
   const wordLength = wordSlots.length;
   const canUseHint = playerPoints >= wordLength;
 
@@ -69,19 +69,19 @@ export function GamePage({ onBack }: GamePageProps) {
           </div>
 
           <div className="word-area">
-            <div className="single-letter-area">
-              <button
-                className="single-letter-box"
-                type="button"
-                disabled={!isPlayerTurn}
-              >
-                {missingLetter}
-              </button>
+            <div className="word-blank-slots">
+              {wordSlots.map((letter, index) => (
+                <div
+                  key={index}
+                  className={`word-blank-slot${letter === missingLetter ? " word-blank-slot--given" : ""}`}
+                >
+                  {letter === missingLetter ? missingLetter : ""}
+                </div>
+              ))}
             </div>
 
             <div className="word-top-row">
               <p className="section-title">Build the hidden word</p>
-
               <button
                 className="info-icon-button"
                 type="button"
@@ -92,23 +92,16 @@ export function GamePage({ onBack }: GamePageProps) {
               </button>
             </div>
 
-            <div className="word-slots-row">
-              {wordSlots.map((letter, index) => (
-                <div key={index} className="word-slot-box">
-                  {letter}
-                </div>
-              ))}
-            </div>
+            <input
+              className="word-input-field"
+              type="text"
+              placeholder="Type the word here..."
+              maxLength={20}
+              autoComplete="off"
+              disabled={!isPlayerTurn}
+            />
 
             <div className="word-actions-row">
-              <button
-                className="undo-icon-button"
-                type="button"
-                aria-label="Undo letter"
-              >
-                ↩
-              </button>
-
               <div className="points-display-box">
                 <span>Points: {playerPoints}</span>
               </div>
