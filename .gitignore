@@ -40,5 +40,10 @@ backend/db-config.json
 **/obj/
 
 
+
+backend/*.env
+*.env
+db-config.env
+
 # Ignore Makefile Timoty använder
 Makefile
