@@ -1,7 +1,9 @@
 public class GameService
 {
+    //database
     private readonly Supabase.Client _client = SupabaseConfig.Instance;
 
+    //create new game with game-id and player one with player-id
     public async Task<Game> CreateGame(string word, string playerName)
     {
         var newGame = new Game
@@ -30,15 +32,35 @@ public class GameService
         var finalUpdate = await _client.From<Game>().Update(insertedGame);
 
         return finalUpdate.Model!;
-
-        //newGame.ActivePlayerId = firstPlayer.Id;
-
-        //await _client.From<Game>().Insert(newGame);
-        //await _client.From<Player>().Insert(firstPlayer);
-
-        //return newGame;
     }
 
+    //Joining a game (Player two)
+    public async Task<Player> JoinGame(string gameId, string playerName)
+    {
+        var existingPlayers = await GetPlayersInGame(gameId);
+
+        var newPlayer = new Player
+        {
+            GameId = gameId,
+            PlayerName = playerName,
+            TurnOrder = existingPlayers.Count
+        };
+
+        var response = await _client.From<Player>().Insert(newPlayer);
+
+        return response.Model!;
+    }
+    //player list
+    public async Task<List<Player>> GetPlayersInGame(string gameId)
+    {
+        var response = await _client
+            .From<Player>()
+            .Where(x => x.GameId == gameId)
+            .Get();
+
+        return response.Models;
+    }
+    //Game list
     public async Task<List<Game>> GetAllGames()
     {
         var response = await _client.From<Game>().Get();
