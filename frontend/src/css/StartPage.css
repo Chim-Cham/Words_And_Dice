@@ -58,43 +58,6 @@ body {
   width: 280px;
 }
 
-/* Input field for game id */
-.game-id {
-  width: 100%;
-  padding: 14px 0px 14px 14px;
-  font-size: 18px;
-  border-radius: 10px;
-  border: 3px solid rgb(8, 45, 158);
-  outline: none;
-  transition: border-color 0.2s ease;
-}
-
-.game-id::placeholder {
-  color: #807676;
-}
-
-.game-id:focus {
-  border-color: rgb(52, 96, 227);
-}
-
-/* Copy button */
-.copy-btn {
-  position: absolute;
-  right: 10px;
-  top: 50%;
-  transform: translateY(-50%);
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 0;
-  z-index: 3;
-}
-
-.copy-btn img {
-  width: 18px;
-  height: 18px;
-}
-
 /* Username input */
 .username-input {
   width: 100%;
@@ -215,18 +178,6 @@ body {
 }
 
 .btn.Start:hover {
-  background-color: rgb(44, 221, 44);
-  transform: translateY(-5px);
-}
-
-
-/* Join game button */
-.btn.joining {
-  background-color: rgb(224, 232, 224);
-  color: rgb(0, 0, 0);
-}
-
-.btn.joining:hover {
   background-color: rgb(44, 221, 44);
   transform: translateY(-5px);
 }
