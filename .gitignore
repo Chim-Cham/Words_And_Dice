@@ -38,3 +38,7 @@ backend/db-config.json
 *.sln.docuser
 **/bin/
 **/obj/
+
+
+# Ignore Makefile Timoty använder
+Makefile
