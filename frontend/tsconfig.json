@@ -6,6 +6,9 @@
     },
     {
       "path": "./tsconfig.node.json"
+    },
+    {
+      "path": "./frontend-tests/tsconfig.json"
     }
   ]
 }

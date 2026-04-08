@@ -38,12 +38,15 @@ backend/db-config.json
 *.sln.docuser
 **/bin/
 **/obj/
-
-
-
+#env
 backend/*.env
 *.env
 db-config.env
 
 # Ignore Makefile Timoty använder
 Makefile
+# Playwright
+frontend/test-results/
+frontend/playwright-report/
+frontend/blob-report/
+frontend/playwright/.cache/
