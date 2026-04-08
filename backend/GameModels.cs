@@ -1,6 +1,8 @@
 using Postgrest.Attributes;
 using Postgrest.Models;
 
+namespace wndgame;
+
 [Table("games")]
 public class Game : BaseModel
 {

@@ -1,5 +1,6 @@
 using Supabase;
 using dotenv.net;
+namespace wndgame;
 
 public static class SupabaseConfig
 {

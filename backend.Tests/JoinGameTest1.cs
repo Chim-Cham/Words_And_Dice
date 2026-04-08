@@ -1,4 +1,5 @@
 using Xunit;
+using wndgame;
 
 namespace backend.Tests;
 

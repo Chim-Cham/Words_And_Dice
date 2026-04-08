@@ -1,3 +1,5 @@
+namespace wndgame;
+
 public class GameService
 {
     //database
