@@ -8,8 +8,12 @@ public class GameService
         {
             TargetWord = word.ToUpper(),
             CurrentDisplay = new string('_', word.Length),
-            Status = "waiting"
+            Status = "waiting",
+            ActivePlayerId = null
         };
+
+        var gameResponse = await _client.From<Game>().Insert(newGame);
+        var insertedGame = gameResponse.Model!;
 
         var firstPlayer = new Player
         {
@@ -18,12 +22,21 @@ public class GameService
             TurnOrder = 0
         };
 
-        newGame.ActivePlayerId = firstPlayer.Id;
 
-        await _client.From<Game>().Insert(newGame);
-        await _client.From<Player>().Insert(firstPlayer);
+        var playerResponse = await _client.From<Player>().Insert(firstPlayer);
+        var insertedPlayer = playerResponse.Model!;
 
-        return newGame;
+        insertedGame.ActivePlayerId = insertedPlayer.Id;
+        var finalUpdate = await _client.From<Game>().Update(insertedGame);
+
+        return finalUpdate.Model!;
+
+        //newGame.ActivePlayerId = firstPlayer.Id;
+
+        //await _client.From<Game>().Insert(newGame);
+        //await _client.From<Player>().Insert(firstPlayer);
+
+        //return newGame;
     }
 
     public async Task<List<Game>> GetAllGames()
