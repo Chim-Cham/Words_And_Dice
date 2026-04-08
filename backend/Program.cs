@@ -4,9 +4,9 @@ builder.Services.AddScoped<GameService>();
 
 var app = builder.Build();
 
-app.MapPost("/debug/create-game", async (string word, GameService gameService) =>
+app.MapPost("/debug/create-game", async (string word, string name, GameService gameService) =>
 {
-    var game = await gameService.CreateGame(word);
+    var game = await gameService.CreateGame(word, name);
     return Results.Ok(game);
 });
 

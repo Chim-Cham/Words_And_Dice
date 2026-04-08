@@ -2,16 +2,28 @@ public class GameService
 {
     private readonly Supabase.Client _client = SupabaseConfig.Instance;
 
-    public async Task<Game> CreateGame(string word)
+    public async Task<Game> CreateGame(string word, string playerName)
     {
         var newGame = new Game
         {
             TargetWord = word.ToUpper(),
-            CurrentDisplay = new string('_', word.Length)
+            CurrentDisplay = new string('_', word.Length),
+            Status = "waiting"
         };
 
-        var response = await _client.From<Game>().Insert(newGame);
-        return response.Model!;
+        var firstPlayer = new Player
+        {
+            GameId = newGame.Id,
+            PlayerName = playerName,
+            TurnOrder = 0
+        };
+
+        newGame.ActivePlayerId = firstPlayer.Id;
+
+        await _client.From<Game>().Insert(newGame);
+        await _client.From<Player>().Insert(firstPlayer);
+
+        return newGame;
     }
 
     public async Task<List<Game>> GetAllGames()
