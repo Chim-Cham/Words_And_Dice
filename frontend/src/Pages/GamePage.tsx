@@ -17,6 +17,17 @@ export function GamePage({ onBack }: GamePageProps) {
 
   // Exempelordet är CAT där C och T saknas
   const wordSlots = ["b", "o", "a", "T"];
+  function randomIndices(slots: string[]) {
+    const indices = slots.map((_, i) => i);
+    indices.sort(() => Math.random() - 0.5);
+    return indices.slice(0, 2);
+  }
+  const [diceIndices, setDiceIndices] = useState(() => randomIndices(wordSlots));
+  function reroll() {
+    setDiceIndices(randomIndices(wordSlots));
+    setRolling(true);
+    setTimeout(() => setRolling(false), 1400);
+  }
   const wordLength = wordSlots.length;
   const canUseHint = playerPoints >= wordLength;
   useEffect(() => {                                     // ← and this
@@ -64,6 +75,11 @@ export function GamePage({ onBack }: GamePageProps) {
               </p>
             )}
           </div>
+          {/* THIS IS TEMPORARY FOR TESTING REMOVE BEFORE PUSH TO MAIN*/}
+          <button className="back-button" type="button" onClick={reroll}
+            style={{ left: "auto", right: 20 }}>
+            Reroll
+          </button>
         </aside>
 
         <section className="game-center">
@@ -77,7 +93,7 @@ export function GamePage({ onBack }: GamePageProps) {
           <div className="word-area">
             <DiceWordRow
               word={wordSlots.join("")}
-              diceIndices={[1]}
+              diceIndices={diceIndices}
               rolling={rolling}
             />
 
