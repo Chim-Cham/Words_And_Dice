@@ -1,7 +1,9 @@
 import { useState } from "react";
 import "../css/GamePage.css";
+import { WORDS } from "../data/words";
 
-type GamePageProps = { onBack: () => void };
+
+type GamePageProps = { onBack: () => void; };
 
 export function GamePage({ onBack }: GamePageProps) {
   const [showInstructions, setShowInstructions] = useState(false);
