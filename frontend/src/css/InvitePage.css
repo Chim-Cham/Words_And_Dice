@@ -1,0 +1,72 @@
+.invite-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 80px;
+  color: rgb(143, 6, 6);
+  font-family: 'Inter', sans-serif;
+}
+
+.title {
+  font-size: 48px;
+  font-weight: 700;
+  color: rgb(136, 22, 22);
+  letter-spacing: 1px;
+  text-shadow:
+    0 0 10px rgba(153, 12, 12, 0.6),
+    0 0 20px rgba(235, 18, 18, 0.4),
+    0 0 40px rgba(70, 4, 4, 0.2);
+}
+
+.tag-line {
+  color: rgb(136, 22, 22);
+  font-size: 18px;
+  letter-spacing: 1px;
+  margin-top: 10px;
+}
+
+.form-section {
+  margin-top: 120px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 320px;
+  gap: 30px;
+}
+
+.info-box {
+  width: 100%;
+}
+
+.info-label {
+  color: rgb(200, 200, 200);
+  margin-bottom: 6px;
+}
+
+.info-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.info-value {
+  color: white;
+  font-size: 16px;
+  word-break: break-all;
+}
+
+.copy-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+.copy-btn img {
+  width: 18px;
+  height: 18px;
+}
+
+.button-group {
+  margin-top: 20px;
+}
