@@ -18,7 +18,7 @@ export function StartPage({ onStartGame }: StartPageProps) {
         </div>
 
         <div className="button-group">
-          <button className="btn Start" type="button" onClick={onStartGame}>Start Game</button>
+          <button className="btn Start" type="button" onClick={onStartGame}>Invite player</button>
         </div>
       </div>
     </div>
