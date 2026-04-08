@@ -112,6 +112,114 @@ body {
   font-weight: 600;
 }
 
+.dice-word-row {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  margin-bottom: 26px;
+}
+
+.dice-row,
+.word-slots-row {
+  display: flex;
+  gap: 12px;
+}
+
+.dice-col {
+  width: 62px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  min-height: 80px;
+}
+
+.die-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.die-face {
+  width: 48px;
+  height: 48px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #e74c3c, #c0392b);
+  color: #fff;
+  font-size: 1.4rem;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 14px rgba(231, 76, 60, 0.45), 0 2px 6px rgba(0, 0, 0, 0.5);
+  transition: box-shadow 0.3s;
+  user-select: none;
+}
+
+.die-face--rolling {
+  animation: die-shake 0.1s infinite alternate;
+  box-shadow: 0 0 18px rgba(231, 76, 60, 0.7), 0 4px 12px rgba(0, 0, 0, 0.6);
+}
+
+@keyframes die-shake {
+  from {
+    transform: rotate(-6deg) translateY(-2px);
+  }
+
+  to {
+    transform: rotate(6deg) translateY(2px);
+  }
+}
+
+.die-arrow {
+  width: 0;
+  height: 0;
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-top: 10px solid #c0392b;
+  margin-top: 2px;
+}
+
+.die-connector {
+  width: 2px;
+  height: 10px;
+  background: linear-gradient(to bottom, #c0392b, transparent);
+  opacity: 0.5;
+}
+
+.word-slot {
+  width: 62px;
+  height: 62px;
+  border-radius: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.03);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  font-weight: 700;
+  color: #444;
+  transition: border-color 0.3s, color 0.3s, background 0.3s, transform 0.2s;
+}
+
+.word-slot--revealed {
+  border-color: #e74c3c;
+  background: rgba(231, 76, 60, 0.1);
+  color: #fff;
+  box-shadow: 0 0 14px rgba(231, 76, 60, 0.3);
+  animation: slot-pop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes slot-pop {
+  from {
+    transform: scale(0.85);
+  }
+
+  to {
+    transform: scale(1);
+  }
+}
+
 .game-center {
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.03));
   border: 2px solid rgba(90, 154, 255, 0.75);

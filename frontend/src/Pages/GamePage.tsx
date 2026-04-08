@@ -1,23 +1,29 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import "../css/GamePage.css";
+import { DiceWordRow } from "../components/DiceWordRow";
+
 
 type GamePageProps = { onBack: () => void };
 
 export function GamePage({ onBack }: GamePageProps) {
   const [showInstructions, setShowInstructions] = useState(false);
-
+  const [rolling, setRolling] = useState(true);
   // Endast enkel UI-demo just nu
   const level = 1;
   const category = "Animals";
   const isPlayerTurn = true;
   const playerPoints = 0;
   const maxScore = 5;
-  const missingLetter = "A";
 
   // Exempelordet är CAT där C och T saknas
-  const wordSlots = ["C", "A", "T"];
+  const wordSlots = ["b", "o", "a", "T"];
   const wordLength = wordSlots.length;
   const canUseHint = playerPoints >= wordLength;
+  useEffect(() => {                                     // ← and this
+    const t = setTimeout(() => setRolling(false), 1400);
+    return () => clearTimeout(t);
+  }, []);
+
 
   return (
     <div className="game-page">
@@ -69,16 +75,11 @@ export function GamePage({ onBack }: GamePageProps) {
           </div>
 
           <div className="word-area">
-            <div className="word-blank-slots">
-              {wordSlots.map((letter, index) => (
-                <div
-                  key={index}
-                  className={`word-blank-slot${letter === missingLetter ? " word-blank-slot--given" : ""}`}
-                >
-                  {letter === missingLetter ? missingLetter : ""}
-                </div>
-              ))}
-            </div>
+            <DiceWordRow
+              word={wordSlots.join("")}
+              diceIndices={[1]}
+              rolling={rolling}
+            />
 
             <div className="word-top-row">
               <p className="section-title">Build the hidden word</p>
