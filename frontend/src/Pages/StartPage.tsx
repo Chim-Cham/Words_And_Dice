@@ -1,7 +1,6 @@
 import "../css/StartPage.css";
-import copyIcon from "../assets/copy.svg";
 
-type StartPageProps = {onStartGame: () => void;};
+type StartPageProps = { onStartGame: () => void; };
 
 export function StartPage({ onStartGame }: StartPageProps) {
   return (
@@ -13,17 +12,6 @@ export function StartPage({ onStartGame }: StartPageProps) {
         <div className="input-wrapper neon-border">
           <input
             type="text"
-            placeholder="Game ID"
-            className="game-id"
-          />
-          <button className="copy-btn">
-            <img src={copyIcon} alt="Copy" />
-          </button>
-        </div>
-
-        <div className="input-wrapper neon-border">
-          <input
-            type="text"
             placeholder="Username"
             className="username-input"
           />
@@ -31,7 +19,6 @@ export function StartPage({ onStartGame }: StartPageProps) {
 
         <div className="button-group">
           <button className="btn Start" type="button" onClick={onStartGame}>Start Game</button>
-          <button className="btn joining">Join the Game</button>
         </div>
       </div>
     </div>

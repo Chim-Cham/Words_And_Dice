@@ -1,0 +1,128 @@
+.join-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 80px;
+  color: rgb(143, 6, 6);
+  font-family: 'Inter', sans-serif;
+}
+
+.title {
+  font-size: 48px;
+  font-weight: 700;
+  color: rgb(136, 22, 22);
+  letter-spacing: 1px;
+  text-shadow:
+    0 0 10px rgb(153, 12, 12, 0.6),
+    0 0 20px rgb(235, 18, 18, 0.4),
+    0 0 40px rgb(70, 4, 4, 0.2);
+}
+
+.tag-line {
+  color: rgb(136, 22, 22);
+  font-size: 18px;
+  letter-spacing: 1px;
+  margin-top: 10px;
+  text-shadow:
+    0 0 6px rgba(70, 11, 11, 0.7),
+    0 0 12px rgba(255, 0, 0, 0.5),
+    0 0 20px rgba(255, 0, 0, 0.3);
+}
+
+.form-section {
+  margin-top: 120px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 280px;
+}
+
+.game-info-box {
+  width: 100%;
+  margin-bottom: 30px;
+}
+
+.info-text {
+  margin-bottom: 10px;
+  color: rgb(255, 255, 255);
+  font-size: 16px;
+}
+
+.game-id-display {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.game-id {
+  color: rgb(255, 255, 255);
+  font-size: 18px;
+}
+
+.copy-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+.copy-btn img {
+  width: 18px;
+  height: 18px;
+}
+
+.input-wrapper {
+  position: relative;
+  margin-top: 20px;
+  width: 100%;
+}
+
+.join-input {
+  width: 100%;
+  padding: 14px;
+  font-size: 18px;
+  border-radius: 10px;
+  border: none;
+  outline: none;
+  color: white;
+  background: transparent;
+}
+
+.join-input::placeholder {
+  color: #807676;
+}
+
+.button-group {
+  margin-top: 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.btn {
+  padding: 14px 28px;
+  font-size: 18px;
+  border-radius: 8px;
+  cursor: pointer;
+  border: none;
+  width: 200px;
+  border: 3px solid rgb(10, 84, 16);
+  transition: background-color 0.3s ease, transform 0.1s ease;
+
+  box-shadow:
+    inset 0 0 8px rgba(11, 202, 36, 0.4),
+    inset 0 0 15px rgba(10, 112, 24, 0.2),
+    0 0 10px rgba(25, 234, 53, 0.4),
+    0 0 20px rgba(26, 160, 44, 0.25),
+    0 0 40px rgba(31, 228, 57, 0.15);
+}
+
+.btn.joining {
+  background-color: rgb(224, 232, 224);
+  color: rgba(0, 0, 0);
+}
+
+.btn.joining:hover {
+  background-color: rgb(44, 221, 44);
+  transform: translateY(-5px);
+}
