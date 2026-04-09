@@ -1,10 +1,12 @@
 using Postgrest.Attributes;
 using Postgrest.Models;
 
+namespace wndgame;
+
 [Table("games")]
 public class Game : BaseModel
 {
-    [PrimaryKey("id", false)]
+    [PrimaryKey("id", shouldInsert: true)]
     public string Id { get; set; } = Guid.NewGuid().ToString();
 
     [Column("status")]
@@ -23,7 +25,7 @@ public class Game : BaseModel
 [Table("players")]
 public class Player : BaseModel
 {
-    [PrimaryKey("id", false)]
+    [PrimaryKey("id", shouldInsert: true)]
     public string Id { get; set; } = Guid.NewGuid().ToString();
 
     [Column("game_id")]

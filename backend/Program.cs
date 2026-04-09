@@ -1,18 +1,31 @@
+using wndgame;
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddScoped<GameService>();
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", policy =>
+    {
+        policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
+    });
+});
+
 var app = builder.Build();
 
-app.MapPost("/debug/create-game", async (string word, GameService gameService) =>
-{
-    var game = await gameService.CreateGame(word);
-    return Results.Ok(game);
-});
+app.UseCors("AllowAll");
 
-app.MapGet("/debug/games", async (GameService gameService) =>
-{
-    return Results.Ok(await gameService.GetAllGames());
-});
+//Test Api endpoints
+app.DebugStart();
+
+/*Real API*/
+// Create game enpoint
+app.CreateGameStart();
+// Join gameenpoint
+app.JoinGameStart();
+//Util and admin endpoints 
+app.UtilApiStart();
+
 
 app.Run();
