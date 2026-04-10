@@ -1,0 +1,26 @@
+using System.Text.Json;
+using Xunit;
+namespace backend.Tests;
+using Microsoft.AspNetCore.Mvc.Testing;
+
+public class ApiTest
+{
+    private readonly HttpClient _client;
+
+    [Fact]
+    public async Task fetchTest()
+    {
+        // Fetch from API
+        var response = await _client.GetAsync("/api/word/animals/5");
+
+        // Check fetch was succesful
+        response.EnsureSuccessStatusCode();
+
+        var content = await response.Content.ReadAsStringAsync();
+        var words = JsonSerializer.Deserialize<string>(content);
+
+        Assert.NotNull(words);
+        Assert.NotEmpty(words);
+
+    }
+}
