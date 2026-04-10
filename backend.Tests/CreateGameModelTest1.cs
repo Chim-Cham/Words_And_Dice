@@ -16,25 +16,18 @@ public class GameServiceIntegrationTests
         // Act
         var game = await service.CreateGame(testWord, playerName);
 
-        var player = new Player
-        {
-            GameId = game.Id,
-            PlayerName = playerName,
-            TurnOrder = 1
-        };
+        var playersInGame = await service.GetPlayersInGame(game.Id);
 
-        var client = SupabaseConfig.Instance;
-        var response = await client.From<Player>().Insert(player);
+        Assert.NotNull(game.Id);
+        Assert.Equal(testWord, game.TargetWord);
+        Assert.Equal(100, game.WinningScore);
 
-        // Assert
-        Assert.NotNull(response.Model);
-        Assert.Equal(playerName, response.Model.PlayerName);
+        // Assert - Spelaren
+        Assert.Single(playersInGame);
 
-        var fetchResponse = await client.From<Player>()
-            .Where(p => p.Id == player.Id)
-            .Get();
-
-        Assert.Single(fetchResponse.Models);
-        Assert.Equal(playerName, fetchResponse.Models[0].PlayerName);
+        var firstPlayer = playersInGame[0];
+        Assert.Equal(playerName, firstPlayer.PlayerName);
+        Assert.Equal(0, firstPlayer.Score);
+        Assert.False(firstPlayer.IsRoundReady);
     }
 }

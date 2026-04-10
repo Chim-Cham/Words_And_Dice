@@ -17,7 +17,11 @@ public class JoinGameTest
         var allPlayers = await service.GetPlayersInGame(game.Id!);
 
         Assert.Equal(2, allPlayers.Count);
+        Assert.Contains(allPlayers, p => p.PlayerName == "Spelare 1");
         Assert.Contains(allPlayers, p => p.PlayerName == "Spelare 2");
-        Assert.Equal(1, secondPlayer.TurnOrder);
+
+        Assert.Equal(0, secondPlayer.Score);
+        Assert.False(secondPlayer.IsRoundReady);
+        Assert.Equal(game.Id, secondPlayer.GameId);
     }
 }

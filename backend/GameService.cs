@@ -11,9 +11,8 @@ public class GameService
         var newGame = new Game
         {
             TargetWord = word.ToUpper(),
-            CurrentDisplay = new string('_', word.Length),
             Status = "waiting",
-            ActivePlayerId = null
+            WinningScore = 100
         };
 
         var gameResponse = await _client.From<Game>().Insert(newGame);
@@ -23,29 +22,26 @@ public class GameService
         {
             GameId = newGame.Id,
             PlayerName = playerName,
-            TurnOrder = 0
+            Score = 0,
+            IsRoundReady = false
         };
 
 
-        var playerResponse = await _client.From<Player>().Insert(firstPlayer);
-        var insertedPlayer = playerResponse.Model!;
+        await _client.From<Player>().Insert(firstPlayer);
 
-        insertedGame.ActivePlayerId = insertedPlayer.Id;
-        var finalUpdate = await _client.From<Game>().Update(insertedGame);
-
-        return finalUpdate.Model!;
+        return insertedGame;
     }
 
     //Joining a game (Player two)
     public async Task<Player> JoinGame(string gameId, string playerName)
     {
-        var existingPlayers = await GetPlayersInGame(gameId);
 
         var newPlayer = new Player
         {
             GameId = gameId,
             PlayerName = playerName,
-            TurnOrder = existingPlayers.Count
+            Score = 0,
+            IsRoundReady = false
         };
 
         var response = await _client.From<Player>().Insert(newPlayer);
@@ -68,6 +64,52 @@ public class GameService
         var response = await _client.From<Game>().Get();
         return response.Models;
     }
+
+    public async Task<Player> SubmitRoundResult(string playerId, int newTotalScore)
+    {
+        var response = await _client
+            .From<Player>()
+            .Where(p => p.Id == playerId)
+            .Get();
+
+        var player = response.Model;
+
+        if (player == null)
+        {
+            throw new Exception("Spelaren hittades inte.");
+        }
+
+        player.Score = newTotalScore;
+        player.IsRoundReady = true;
+
+        var updateResponse = await _client.From<Player>().Update(player);
+
+        return updateResponse.Model!;
+    }
+
+    public async Task StartNextRound(string gameId)
+    {
+        var players = await GetPlayersInGame(gameId);
+
+        foreach (var player in players)
+        {
+            player.IsRoundReady = false;
+            // Om du har lagt till LastGuess, kan det vara bra att tömma den här också
+            player.LastGuess = null;
+
+            await _client.From<Player>().Update(player);
+        }
+
+        //Tanka in ett nytt ord i spelet???
+        /*
+        var gameResponse = await _client.From<Game>().Where(g => g.Id == gameId).Get();
+        var game = gameResponse.Model;
+        if (game != null) 
+        {
+            game.TargetWord = "NYTT_SLUMPAT_ORD";
+            await _client.From<Game>().Update(game);
+        }
+        */
+    }
 }
 
-//Detta är bara ett exemple på hur man hade kunnat göra en grund. utveckla detta när vi bygger upp spel miljön och har api till ord.

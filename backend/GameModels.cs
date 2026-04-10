@@ -15,11 +15,8 @@ public class Game : BaseModel
     [Column("target_word")]
     public string TargetWord { get; set; } = "";
 
-    [Column("current_display")]
-    public string CurrentDisplay { get; set; } = "";
-
-    [Column("active_player_id")]
-    public string? ActivePlayerId { get; set; }
+    [Column("winning_score")]
+    public int WinningScore { get; set; } = 100;
 }
 
 [Table("players")]
@@ -34,8 +31,14 @@ public class Player : BaseModel
     [Column("player_name")]
     public string PlayerName { get; set; } = "";
 
-    [Column("turn_order")]
-    public int TurnOrder { get; set; }
+    [Column("score")]
+    public int Score { get; set; } = 0;
+
+    [Column("last_guess")]
+    public string? LastGuess { get; set; }
+
+    [Column("is_round_ready")]
+    public bool IsRoundReady { get; set; } = false;
 }
 
 //basic setup to get all needed data. 

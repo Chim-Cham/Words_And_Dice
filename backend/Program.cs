@@ -24,6 +24,8 @@ app.DebugStart();
 app.CreateGameStart();
 // Join gameenpoint
 app.JoinGameStart();
+//Rounds
+app.RoundApiStart();
 //Util and admin endpoints 
 app.UtilApiStart();
 
