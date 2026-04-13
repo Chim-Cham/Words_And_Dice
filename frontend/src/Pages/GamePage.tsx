@@ -1,18 +1,30 @@
 import { useState } from "react";
 import "../css/GamePage.css";
-import { WORDS } from "../data/words";
+import { useEffect } from "react";
 
 
 type GamePageProps = { onBack: () => void; };
+type ApiWord = {
+  word: string;
+  category: string;
+  length: number;
+};
 
 export function GamePage({ onBack }: GamePageProps) {
   const [showInstructions, setShowInstructions] = useState(false);
 
-  // Random ord väljaren
-  const [currentWord] = useState(() => {
-    const randomIndex = Math.floor(Math.random() * WORDS.length);
-    return WORDS[randomIndex];
-  });
+  // Hämtar alla möjliga ord från API:et
+  const [currentWord, setCurrentWord] = useState<ApiWord | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [wordSlots, setWordSlots] = useState<string[]>([]);
+
+  // Det som tar fram ett random ord
+  const categories = ["wordle", "brainrot", "counties", "capitals_of_countries", "sports", "animals", "programing_languages", "games", "pc_games", "mobile_games", "companies"];
+  const randomCategory = categories[Math.floor(Math.random() * categories.length)];
+
+  const randomLength = Math.floor(Math.random() * 18) + 3; // ordlängd på mellan 3-20 bokstäver (18 + 3)
+
+
 
   // Tar fram två random bokstäver
   function generateWordSlots(word: string) {
@@ -28,7 +40,46 @@ export function GamePage({ onBack }: GamePageProps) {
     );
   }
 
-  const [wordSlots] = useState(() => generateWordSlots(currentWord.word));
+  useEffect(() => {
+    async function loadWord() {
+      try {
+        const res = await fetch(`http://localhost:5164/api/word/${randomCategory}/${randomLength}`);
+        const data = await res.json();
+
+        const wordObj = data[0];
+
+        setCurrentWord({
+          word: wordObj.word,
+          category: wordObj.category,
+          length: wordObj.length
+        });
+      } catch (err) {
+        console.error("Failed to fetch word:", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadWord();
+  }, []);
+
+  useEffect(() => {
+    if (currentWord) {
+      setWordSlots(generateWordSlots(currentWord.word));
+    }
+  }, [currentWord]);
+
+  if (loading || !currentWord) {
+    return (
+      <div className="game-page">
+        <p>Loading word...</p>
+      </div>
+    );
+  }
+
+
+
+
   const wordLength = currentWord.length;
 
   // Detta är samma som innan
