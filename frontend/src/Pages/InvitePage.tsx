@@ -10,7 +10,7 @@ type InvitePageProps = {
 
 export function InvitePage({ gameId, onContinue }: InvitePageProps) {
   const [isReady, setIsReady] = useState(false);
-  const inviteLink = `${window.location.origin}/join/${gameId} || ""`;
+  const inviteLink = `${window.location.origin}/join/${gameId}`;
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
@@ -32,7 +32,7 @@ export function InvitePage({ gameId, onContinue }: InvitePageProps) {
       } catch (err) {
         console.error("Polling error:", err);
       }
-    }, 3000);
+    }, 1000);
 
     return () => clearInterval(interval);
   }, [gameId]);

@@ -9,14 +9,12 @@ public static class CreateGameApi
     public static void CreateGameStart(this IEndpointRouteBuilder app)
     {
         // Create game
-        app.MapPost("/api/games", async (string word, string name, GameService gameService) =>
+        app.MapPost("/api/games", async (string name, GameService gameService) =>
         {
             try
             {
-                // Nu finns word, name och gameService tillgängliga här inne
-                var game = await gameService.CreateGame(word, name);
+                var game = await gameService.CreateGame(name);
 
-                // Vi mappar till DTO:n för att undvika JSON-serialiseringsfelet
                 var result = new GameDto
                 {
                     Id = game.Id,

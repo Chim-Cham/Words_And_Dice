@@ -1,15 +1,26 @@
 import { useState } from "react";
 import "../css/StartPage.css";
 
-type StartPageProps = { onStartGame: (username: string) => void; };
+type StartPageProps = {
+  onStartGame: (username: string) => void;
+  onGoToJoin: (username: string) => void;
+};
 
-export function StartPage({ onStartGame }: StartPageProps) {
+export function StartPage({ onStartGame, onGoToJoin }: StartPageProps) {
 
   const [username, setUsername] = useState("");
 
   const handleHostGame = () => {
     if (username.trim()) {
       onStartGame(username);
+    } else {
+      alert("Please enter a username first!");
+    }
+  };
+
+  const handleJoinGame = () => {
+    if (username.trim()) {
+      onGoToJoin(username);
     } else {
       alert("Please enter a username first!");
     }
@@ -32,7 +43,10 @@ export function StartPage({ onStartGame }: StartPageProps) {
         </div>
 
         <div className="button-group">
-          <button className="btn Start" type="button" onClick={handleHostGame}>Invite player</button>
+          <button className="btn Start" type="button" onClick={handleHostGame}>Host Game</button>
+        </div>
+        <div>
+          <button className="btn Join" onClick={handleJoinGame}>Join Game</button>
         </div>
       </div>
     </div>
