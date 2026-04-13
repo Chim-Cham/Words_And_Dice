@@ -75,7 +75,7 @@ function App() {
   if (page === "join") {
     return <JoinPage onJoinGame={handleJoinSubmit} onBack={() => setPage("start")} />
   }
-
+  console.log("Current Player ID:", playerId);
   return <StartPage onStartGame={handleStartGame} onGoToJoin={handleGoToJoin} />;
 }
 
