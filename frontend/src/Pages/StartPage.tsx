@@ -1,8 +1,20 @@
+import { useState } from "react";
 import "../css/StartPage.css";
 
-type StartPageProps = { onStartGame: () => void; };
+type StartPageProps = { onStartGame: (username: string) => void; };
 
 export function StartPage({ onStartGame }: StartPageProps) {
+
+  const [username, setUsername] = useState("");
+
+  const handleHostGame = () => {
+    if (username.trim()) {
+      onStartGame(username);
+    } else {
+      alert("Please enter a username first!");
+    }
+  };
+
   return (
     <div className="start-container">
       <h1 className="title">Words & Di<span className="parenthese">c</span>e</h1>
@@ -14,11 +26,13 @@ export function StartPage({ onStartGame }: StartPageProps) {
             type="text"
             placeholder="Username"
             className="username-input"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
           />
         </div>
 
         <div className="button-group">
-          <button className="btn Start" type="button" onClick={onStartGame}>Invite player</button>
+          <button className="btn Start" type="button" onClick={handleHostGame}>Invite player</button>
         </div>
       </div>
     </div>

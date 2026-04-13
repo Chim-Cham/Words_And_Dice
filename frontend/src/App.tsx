@@ -6,11 +6,29 @@ import { GamePage } from "./Pages/GamePage";
 function App() {
   const [page, setPage] = useState<"start" | "invite" | "game">("start");
   const [gameId, setGameId] = useState("");
+  const [playerId, setPlayerId] = useState("");
 
-  function handleStartGame() {
-    const newGameId = Math.random().toString(36).substring(2, 8).toUpperCase();
-    setGameId(newGameId);
-    setPage("invite");
+  async function handleStartGame(username: string) {
+    try {
+      const response = await fetch(`http://localhost:5164/api/games?word=KODNING&name=${username}`, {
+        method: "POST"
+      });
+
+      if (!response.ok) throw new Error("Kunde inte skapa spel");
+
+      const gameData = await response.json();
+
+      const idFromServer = gameData.id || gameData.Id;
+      if (idFromServer) {
+        setGameId(idFromServer);
+        setPage("invite");
+      } else {
+        console.error("Inget ID hittades i svaret:", gameData);
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      alert("Kunde inte starta spelet. Kontrollera att din backend körs!");
+    }
   }
 
   function handleContinue() {

@@ -11,8 +11,27 @@ public static class CreateGameApi
         // Create game
         app.MapPost("/api/games", async (string word, string name, GameService gameService) =>
         {
-            var game = await gameService.CreateGame(word, name);
-            return Results.Created($"/api/games/{game.Id}", game);
+            try
+            {
+                // Nu finns word, name och gameService tillgängliga här inne
+                var game = await gameService.CreateGame(word, name);
+
+                // Vi mappar till DTO:n för att undvika JSON-serialiseringsfelet
+                var result = new GameDto
+                {
+                    Id = game.Id,
+                    Status = game.Status,
+                    TargetWord = game.TargetWord,
+                    WinningScore = game.WinningScore
+                };
+
+                return Results.Created($"/api/games/{result.Id}", result);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"ERROR: {ex.Message}");
+                return Results.Problem("Kunde inte skapa spel i databasen.");
+            }
         });
     }
 }

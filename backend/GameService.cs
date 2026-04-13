@@ -12,7 +12,8 @@ public class GameService
         {
             TargetWord = word.ToUpper(),
             Status = "waiting",
-            WinningScore = 100
+            WinningScore = 100,
+            CurrentRound = 1
         };
 
         var gameResponse = await _client.From<Game>().Insert(newGame);
