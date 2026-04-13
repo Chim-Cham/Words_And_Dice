@@ -14,7 +14,7 @@ export function GamePage({ onBack }: GamePageProps) {
     return WORDS[randomIndex];
   });
 
-  // Tar fram två "ledtrådar"
+  // Tar fram två random bokstäver
   function generateWordSlots(word: string) {
     const letters = word.toUpperCase().split("");
 
