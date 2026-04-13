@@ -1,4 +1,4 @@
-namespace app;
+namespace wndgame;
 using System.Net.Http;
 
 public static class API
