@@ -111,5 +111,11 @@ public class GameService
         }
         */
     }
+    // Väntar på att båda spelarna ska vara redo
+    public async Task<bool> IsGameReady(string gameId)
+    {
+        var players = await GetPlayersInGame(gameId);
+        return players.Count == 2;
+    }
 }
 
