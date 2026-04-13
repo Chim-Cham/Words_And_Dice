@@ -30,4 +30,5 @@ app.RoundApiStart();
 app.UtilApiStart();
 
 
+app.WordGenerator();
 app.Run();
