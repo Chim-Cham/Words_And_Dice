@@ -10,13 +10,16 @@ public class TwoPlayerInGameTest
     public async Task FullGame_TwoPlayersInSameGame()
     {
         var service = new GameService();
-        string secretWord = "KODNING";
 
-        var game = await service.CreateGame(secretWord, "Spelare A");
+        var game = await service.CreateGame("Spelare A");
 
         var playerB = await service.JoinGame(game.Id, "Spelare B");
 
         var allPlayers = await service.GetPlayersInGame(game.Id);
+
+        Assert.Equal("", game.TargetWord);
+        Assert.Equal("waiting", game.Status);
+        Assert.Equal(1, game.CurrentRound);
 
         Assert.Equal(2, allPlayers.Count);
 
