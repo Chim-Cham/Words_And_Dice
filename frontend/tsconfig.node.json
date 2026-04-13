@@ -12,7 +12,9 @@
     "verbatimModuleSyntax": true,
     "moduleDetection": "force",
     "noEmit": true,
-
+    "types": [
+      "node"
+    ],
     /* Linting */
     "strict": true,
     "noUnusedLocals": true,
@@ -21,5 +23,8 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true
   },
-  "include": ["vite.config.ts"]
+  "include": [
+    "vite.config.ts",
+    "playwright.config.ts"
+  ]
 }

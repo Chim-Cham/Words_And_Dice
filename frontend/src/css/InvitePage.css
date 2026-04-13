@@ -1,0 +1,85 @@
+.invite-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 80px;
+  color: rgb(143, 6, 6);
+  font-family: 'Inter', sans-serif;
+}
+
+.title {
+  font-size: 48px;
+  font-weight: 700;
+  color: rgb(136, 22, 22);
+  letter-spacing: 1px;
+  text-shadow:
+    0 0 10px rgba(153, 12, 12, 0.6),
+    0 0 20px rgba(235, 18, 18, 0.4),
+    0 0 40px rgba(70, 4, 4, 0.2);
+}
+
+.tag-line {
+  color: rgb(136, 22, 22);
+  font-size: 18px;
+  letter-spacing: 1px;
+  margin-top: 10px;
+}
+
+.form-section {
+  margin-top: 120px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 320px;
+  gap: 30px;
+}
+
+.info-box {
+  width: 100%;
+  background: rgba(20, 20, 20, 0.85);
+  padding: 18px 20px;
+  border-radius: 12px;
+  box-shadow:
+    0 0 10px rgba(255, 0, 0, 0.25),
+    0 0 25px rgba(255, 0, 0, 0.15);
+  border: 1px solid rgba(255, 0, 0, 0.3);
+}
+
+.info-label {
+  color: rgb(255, 120, 120);
+  font-size: 14px;
+  margin-bottom: 8px;
+  letter-spacing: 1px;
+}
+
+.info-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.info-value {
+  color: white;
+  font-size: 17px;
+  font-weight: 500;
+  word-break: break-all;
+  max-width: 85%;
+}
+
+.copy-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  transition: transform 0.15s ease;
+}
+
+.copy-btn img {
+  width: 20px;
+  height: 20px;
+  filter: drop-shadow(0 0 4px rgba(255, 0, 0, 0.6));
+}
+
+.button-group {
+  transform: scale(1.15);
+}
