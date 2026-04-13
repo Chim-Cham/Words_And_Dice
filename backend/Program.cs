@@ -1,3 +1,5 @@
+using app;
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddScoped<GameService>();
@@ -15,4 +17,5 @@ app.MapGet("/debug/games", async (GameService gameService) =>
     return Results.Ok(await gameService.GetAllGames());
 });
 
+app.WordGenerator();
 app.Run();
