@@ -38,7 +38,13 @@ backend/db-config.json
 *.sln.docuser
 **/bin/
 **/obj/
-
+#env
 backend/*.env
 *.env
 db-config.env
+
+# Playwright
+frontend/test-results/
+frontend/playwright-report/
+frontend/blob-report/
+frontend/playwright/.cache/
