@@ -2,71 +2,100 @@ import { useState, useEffect } from "react";
 import "../css/GamePage.css";
 import { DiceWordRow } from "../components/DiceWordRow";
 
+import { useEffect } from "react";
 
-type GamePageProps = {
-  gameId: string;
-  playerId: string;
-  onBack: () => void;
-};
 
-type Player = {
-  id: string;
-  playerName: string;
-  score: number;
+type GamePageProps = { onBack: () => void; };
+type ApiWord = {
+  word: string;
+  category: string;
+  length: number;
 };
 
 export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
   const [showInstructions, setShowInstructions] = useState(false);
-  const [players, setPlayers] = useState<Player[]>([]);
+
+  // Hämtar alla möjliga ord från API:et
+  const [currentWord, setCurrentWord] = useState<ApiWord | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [wordSlots, setWordSlots] = useState<string[]>([]);
+
+  // Det som tar fram ett random ord
+  const categories = ["brainrot", "countries", "capitals_of_countries", "sports", "animals", "programming_languages", "games", "pc_games", "mobile_games", "companies"];
+  const randomCategory = categories[Math.floor(Math.random() * categories.length)];
+
+  const randomLength = Math.floor(Math.random() * 8) + 3; // ordlängd på mellan 3-10 bokstäver (8 + 3)
+
+
+
+  // Tar fram två random bokstäver
+  function generateWordSlots(word: string) {
+    const letters = word.toUpperCase().split("");
+
+    const revealedIndexes = new Set<number>();
+    while (revealedIndexes.size < 2) {
+      revealedIndexes.add(Math.floor(Math.random() * letters.length));
+    }
+
+    return letters.map((letter, index) =>
+      revealedIndexes.has(index) ? letter : ""
+    );
+  }
 
   useEffect(() => {
-    async function fetchPlayers() {
+    async function loadWord() {
       try {
-        const response = await fetch(`http://localhost:5164/api/games/${gameId}/players`);
-        if (response.ok) {
-          const data = await response.json();
-          setPlayers(data);
-        }
+        const res = await fetch(`http://localhost:5164/api/word/${randomCategory}/${randomLength}`);
+        const data = await res.json();
+
+        const wordObj = data[0];
+
+        setCurrentWord({
+          word: wordObj.word,
+          category: wordObj.category,
+          length: wordObj.length
+        });
       } catch (err) {
-        console.error("Kunde inte hämta spelare:", err);
+        console.error("Failed to fetch word:", err);
+      } finally {
+        setLoading(false);
       }
     }
-    fetchPlayers();
-  }, [gameId]);
 
-  const player1 = players[0];
-  const player2 = players[1];
+    loadWord();
+  }, []);
 
-  const isYouPlayer1 = player1?.id === playerId;
-  const isYouPlayer2 = player2?.id === playerId;
+  useEffect(() => {
+    if (currentWord) {
+      setWordSlots(generateWordSlots(currentWord.word));
+    }
+  }, [currentWord]);
 
-  const [rolling, setRolling] = useState(true);
-  // Endast enkel UI-demo just nu
+  if (loading || !currentWord) {
+    return (
+      <div className="game-page">
+        <p>Loading word...</p>
+      </div>
+    );
+  }
+
+
+
+
+  const wordLength = currentWord.length;
+
+  // Detta är samma som innan
   const level = 1;
-  const category = "Animals";
+  const category = currentWord.category;
   const isPlayerTurn = true;
   const playerPoints = 0;
   const maxScore = 5;
-
-  // Exempelordet är CAT där C och T saknas
-  const wordSlots = ["b", "o", "a", "T"];
-  function randomIndices(slots: string[]) {
-    const indices = slots.map((_, i) => i);
-    indices.sort(() => Math.random() - 0.5);
-    return indices.slice(0, 2);
-  }
-  const [diceIndices, setDiceIndices] = useState(() => randomIndices(wordSlots));
-  function reroll() {
-    setDiceIndices(randomIndices(wordSlots));
-    setRolling(true);
-    setTimeout(() => setRolling(false), 1400);
-  }
-  const wordLength = wordSlots.length;
   const canUseHint = playerPoints >= wordLength;
   useEffect(() => {                                     // ← and this
     const t = setTimeout(() => setRolling(false), 1400);
     return () => clearTimeout(t);
   }, []);
+
 
 
   return (
@@ -125,6 +154,16 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
           </div>
 
           <div className="word-area">
+            <div className="word-blank-slots">
+              {wordSlots.map((letter, index) => ( // Var tvungen att ändra denna div:n
+                <div
+                  key={index}
+                  className={`word-blank-slot${letter ? " word-blank-slot--given" : ""}`}
+                >
+                  {letter}
+                </div>
+              ))}
+            </div>
             <DiceWordRow
               word={wordSlots.join("")}
               diceIndices={diceIndices}
