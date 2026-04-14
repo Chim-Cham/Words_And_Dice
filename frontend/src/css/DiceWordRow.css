@@ -42,6 +42,10 @@
   color: transparent;
 }
 
+.word-slot--empty {
+  border-color: grey;
+}
+
 .die-face {
   position: absolute;
   left: 50%;

@@ -31,8 +31,7 @@ function DieSlot({ letter, rolling, hasDie }: { letter: string; rolling: boolean
 
   return (
     <div className="dice-slot-col">
-      <div className={`word-slot${phase === "settled" ? " word-slot--revealed" : ""}`}>
-        {!hasDie ? "·" : ""}
+      <div className="word-slot word-slot--empty">
       </div>
 
       {hasDie && (
