@@ -2,21 +2,29 @@ import { useState } from "react";
 import "../css/GamePage.css";
 import { useEffect } from "react";
 
+type GamePageProps = {
+  gameId: string;
+  playerId: string;
+  onBack: () => void;
+}
 
-type GamePageProps = { onBack: () => void; };
 type ApiWord = {
   word: string;
   category: string;
   length: number;
 };
 
-export function GamePage({ onBack }: GamePageProps) {
+export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
   const [showInstructions, setShowInstructions] = useState(false);
 
   // Hämtar alla möjliga ord från API:et
   const [currentWord, setCurrentWord] = useState<ApiWord | null>(null);
   const [loading, setLoading] = useState(true);
   const [wordSlots, setWordSlots] = useState<string[]>([]);
+
+  // State för att hålla koll på poäng och gissningar
+  const [playerPoints, setPlayerPoints] = useState(0);
+  const [guess, setGuess] = useState("");
 
   // Det som tar fram ett random ord
   const categories = ["brainrot", "countries", "capitals_of_countries", "sports", "animals", "programming_languages", "games", "pc_games", "mobile_games", "companies"];
@@ -69,6 +77,21 @@ export function GamePage({ onBack }: GamePageProps) {
     }
   }, [currentWord]);
 
+  useEffect(() => {
+    async function loadPlayer() {
+      try {
+        const res = await fetch(`http://localhost:5164/api/games/${gameId}/players`);
+        const players = await res.json();
+        const me = players.find((p: any) => p.id === playerId);
+        if (me) setPlayerPoints(me.score);
+      } catch (err) {
+        console.error("Failed to fetch player:", err);
+      }
+    }
+
+    loadPlayer();
+  }, [gameId, playerId]);
+
   if (loading || !currentWord) {
     return (
       <div className="game-page">
@@ -86,7 +109,6 @@ export function GamePage({ onBack }: GamePageProps) {
   const level = 1;
   const category = currentWord.category;
   const isPlayerTurn = true;
-  const playerPoints = 0;
   const maxScore = 5;
   const canUseHint = playerPoints >= wordLength;
 
@@ -171,6 +193,8 @@ export function GamePage({ onBack }: GamePageProps) {
               maxLength={20}
               autoComplete="off"
               disabled={!isPlayerTurn}
+              value={guess}
+              onChange={(e) => setGuess(e.target.value)}
             />
 
             <div className="word-actions-row">
