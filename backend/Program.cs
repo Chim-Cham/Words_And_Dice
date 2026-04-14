@@ -28,7 +28,7 @@ app.JoinGameStart();
 app.RoundApiStart();
 //Util and admin endpoints 
 app.UtilApiStart();
-
-
+// Word Generator endpoints
 app.WordGenerator();
+
 app.Run();
