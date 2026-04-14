@@ -1,52 +1,32 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import "../css/GamePage.css";
-import { WORDS } from "../data/words";
+import { useEffect } from "react";
 
-type GamePageProps = {
-  gameId: string;
-  playerId: string;
-  onBack: () => void;
+
+type GamePageProps = { onBack: () => void; };
+type ApiWord = {
+  word: string;
+  category: string;
+  length: number;
 };
 
-type Player = {
-  id: string;
-  playerName: string;
-  score: number;
-};
-
-export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
+export function GamePage({ onBack }: GamePageProps) {
   const [showInstructions, setShowInstructions] = useState(false);
-  const [players, setPlayers] = useState<Player[]>([]);
 
-  useEffect(() => {
-    async function fetchPlayers() {
-      try {
-        const response = await fetch(`http://localhost:5164/api/games/${gameId}/players`);
-        if (response.ok) {
-          const data = await response.json();
-          setPlayers(data);
-        }
-      } catch (err) {
-        console.error("Kunde inte hämta spelare:", err);
-      }
-    }
-    fetchPlayers();
-  }, [gameId]);
+  // Hämtar alla möjliga ord från API:et
+  const [currentWord, setCurrentWord] = useState<ApiWord | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [wordSlots, setWordSlots] = useState<string[]>([]);
 
-  const player1 = players[0];
-  const player2 = players[1];
+  // Det som tar fram ett random ord
+  const categories = ["brainrot", "countries", "capitals_of_countries", "sports", "animals", "programming_languages", "games", "pc_games", "mobile_games", "companies"];
+  const randomCategory = categories[Math.floor(Math.random() * categories.length)];
 
-  const isYouPlayer1 = player1?.id === playerId;
-  const isYouPlayer2 = player2?.id === playerId;
+  const randomLength = Math.floor(Math.random() * 8) + 3; // ordlängd på mellan 3-10 bokstäver (8 + 3)
 
 
-  // Random ord väljaren
-  const [currentWord] = useState(() => {
-    const randomIndex = Math.floor(Math.random() * WORDS.length);
-    return WORDS[randomIndex];
-  });
 
-  // Tar fram två "ledtrådar"
+  // Tar fram två random bokstäver
   function generateWordSlots(word: string) {
     const letters = word.toUpperCase().split("");
 
@@ -60,7 +40,46 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
     );
   }
 
-  const [wordSlots] = useState(() => generateWordSlots(currentWord.word));
+  useEffect(() => {
+    async function loadWord() {
+      try {
+        const res = await fetch(`http://localhost:5164/api/word/${randomCategory}/${randomLength}`);
+        const data = await res.json();
+
+        const wordObj = data[0];
+
+        setCurrentWord({
+          word: wordObj.word,
+          category: wordObj.category,
+          length: wordObj.length
+        });
+      } catch (err) {
+        console.error("Failed to fetch word:", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadWord();
+  }, []);
+
+  useEffect(() => {
+    if (currentWord) {
+      setWordSlots(generateWordSlots(currentWord.word));
+    }
+  }, [currentWord]);
+
+  if (loading || !currentWord) {
+    return (
+      <div className="game-page">
+        <p>Loading word...</p>
+      </div>
+    );
+  }
+
+
+
+
   const wordLength = currentWord.length;
 
   // Detta är samma som innan
@@ -87,11 +106,10 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
 
       <main className="game-layout">
         <aside className="game-side">
-          <div className={`info-card ${isYouPlayer1 ? "local-player-highlight" : ""}`}>
-            <h2>Player 1 {isYouPlayer1 ? "(You)" : ""}</h2>
+          <div className="info-card">
+            <h2>Player 1</h2>
             <div className="player-circle"></div>
-            <p className="player-name">{player1?.playerName || "Loading..."}</p>
-            <p className="player-score">Points: {player1?.score || 0}</p>
+            <p className="player-name">Player 1</p>
           </div>
 
           <div className="info-card hint-card">
@@ -178,11 +196,10 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
         </section>
 
         <aside className="game-side">
-          <div className={`info-card ${isYouPlayer2 ? "local-player-highlight" : ""}`}>
-            <h2>Player 2 {isYouPlayer2 ? "(You)" : ""}</h2>
+          <div className="info-card">
+            <h2>Player 2</h2>
             <div className="player-circle opponent-circle"></div>
-            <p className="player-name">{player2?.playerName || "Waiting..."}</p>
-            <p className="player-score">Points: {player2?.score || 0}</p>
+            <p className="player-name">Player 2</p>
           </div>
 
           <div className="info-card">
