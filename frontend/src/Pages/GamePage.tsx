@@ -19,10 +19,10 @@ export function GamePage({ onBack }: GamePageProps) {
   const [wordSlots, setWordSlots] = useState<string[]>([]);
 
   // Det som tar fram ett random ord
-  const categories = ["wordle", "brainrot", "counties", "capitals_of_countries", "sports", "animals", "programing_languages", "games", "pc_games", "mobile_games", "companies"];
+  const categories = ["brainrot", "countries", "capitals_of_countries", "sports", "animals", "programming_languages", "games", "pc_games", "mobile_games", "companies"];
   const randomCategory = categories[Math.floor(Math.random() * categories.length)];
 
-  const randomLength = Math.floor(Math.random() * 18) + 3; // ordlängd på mellan 3-20 bokstäver (18 + 3)
+  const randomLength = Math.floor(Math.random() * 8) + 3; // ordlängd på mellan 3-10 bokstäver (8 + 3)
 
 
 
