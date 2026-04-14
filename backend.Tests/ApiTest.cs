@@ -1,21 +1,29 @@
 using Xunit;
 namespace backend.Tests;
+
 using System.Text.Json;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Mvc.Testing;
+using System.Net.Http;
 
-public class ApiTest
+public class ApiTest : IClassFixture<WebApplicationFactory<Program>>
 {
+    private readonly HttpClient _client;
 
+    public ApiTest(WebApplicationFactory<Program> factory)
+    {
+        _client = factory.CreateClient();
+    }
 
     [Fact]
     public async Task wordFetch()
     {
-        using var fetch = new HttpClient();
+        //using var fetch = new HttpClient();
 
         // Fetch from API
         // var response = await fetch.GetAsync("https://random-words-api.kushcreates.com/api?language=en&category=animals&length=5");
-        var response = await fetch.GetAsync("http://localhost:5164/api/word/animals/5");
-
+        // var response = await fetch.GetAsync("http://localhost:5164/api/word/animals/5");
+        var response = await _client.GetAsync("/api/word/animals/5");
 
         // Check fetch was succesful
         response.EnsureSuccessStatusCode();

@@ -10,7 +10,7 @@ public class JoinGameTest
     public async Task JoinGame_AddSecondPlayerExistingGame()
     {
         var service = new GameService();
-        var game = await service.CreateGame("HÄST", "Spelare 1");
+        var game = await service.CreateGame("Spelare 1");
 
         var secondPlayer = await service.JoinGame(game.Id!, "Spelare 2");
 

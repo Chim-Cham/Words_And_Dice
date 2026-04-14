@@ -3,10 +3,43 @@ import "../css/GamePage.css";
 import { DiceWordRow } from "../components/DiceWordRow";
 
 
-type GamePageProps = { onBack: () => void };
+type GamePageProps = {
+  gameId: string;
+  playerId: string;
+  onBack: () => void;
+};
 
-export function GamePage({ onBack }: GamePageProps) {
+type Player = {
+  id: string;
+  playerName: string;
+  score: number;
+};
+
+export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
   const [showInstructions, setShowInstructions] = useState(false);
+  const [players, setPlayers] = useState<Player[]>([]);
+
+  useEffect(() => {
+    async function fetchPlayers() {
+      try {
+        const response = await fetch(`http://localhost:5164/api/games/${gameId}/players`);
+        if (response.ok) {
+          const data = await response.json();
+          setPlayers(data);
+        }
+      } catch (err) {
+        console.error("Kunde inte hämta spelare:", err);
+      }
+    }
+    fetchPlayers();
+  }, [gameId]);
+
+  const player1 = players[0];
+  const player2 = players[1];
+
+  const isYouPlayer1 = player1?.id === playerId;
+  const isYouPlayer2 = player2?.id === playerId;
+
   const [rolling, setRolling] = useState(true);
   // Endast enkel UI-demo just nu
   const level = 1;
@@ -51,10 +84,11 @@ export function GamePage({ onBack }: GamePageProps) {
 
       <main className="game-layout">
         <aside className="game-side">
-          <div className="info-card">
-            <h2>Player 1</h2>
+          <div className={`info-card ${isYouPlayer1 ? "local-player-highlight" : ""}`}>
+            <h2>Player 1 {isYouPlayer1 ? "(You)" : ""}</h2>
             <div className="player-circle"></div>
-            <p className="player-name">Player 1</p>
+            <p className="player-name">{player1?.playerName || "Loading..."}</p>
+            <p className="player-score">Points: {player1?.score || 0}</p>
           </div>
 
           <div className="info-card hint-card">
@@ -141,10 +175,11 @@ export function GamePage({ onBack }: GamePageProps) {
         </section>
 
         <aside className="game-side">
-          <div className="info-card">
-            <h2>Player 2</h2>
+          <div className={`info-card ${isYouPlayer2 ? "local-player-highlight" : ""}`}>
+            <h2>Player 2 {isYouPlayer2 ? "(You)" : ""}</h2>
             <div className="player-circle opponent-circle"></div>
-            <p className="player-name">Player 2</p>
+            <p className="player-name">{player2?.playerName || "Waiting..."}</p>
+            <p className="player-score">Points: {player2?.score || 0}</p>
           </div>
 
           <div className="info-card">

@@ -17,6 +17,9 @@ public class Game : BaseModel
 
     [Column("winning_score")]
     public int WinningScore { get; set; } = 100;
+
+    [Column("current_round")]
+    public int CurrentRound { get; set; } = 1;
 }
 
 [Table("players")]
