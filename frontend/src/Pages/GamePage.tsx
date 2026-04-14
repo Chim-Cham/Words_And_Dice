@@ -16,6 +16,7 @@ type Player = {
 export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
   const [showInstructions, setShowInstructions] = useState(false);
   const [players, setPlayers] = useState<Player[]>([]);
+  const [timeLeft, setTimeLeft] = useState(45); //change here if we need to have a longer display time
 
   useEffect(() => {
     async function fetchPlayers() {
@@ -31,6 +32,17 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
     }
     fetchPlayers();
   }, [gameId]);
+
+  //count down logic for timer.
+  useEffect(() => {
+    if (timeLeft <= 0) return;
+
+    const timerId = setInterval(() => {
+      setTimeLeft((prevTime) => prevTime - 1);
+    }, 1000);
+
+    return () => clearInterval(timerId);
+  }, [timeLeft]);
 
   const player1 = players[0];
   const player2 = players[1];
@@ -51,6 +63,8 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
   const wordSlots = ["C", "A", "T"];
   const wordLength = wordSlots.length;
   const canUseHint = playerPoints >= wordLength;
+
+  const isInputDisabled = !isPlayerTurn || timeLeft === 0;
 
 
 
@@ -99,10 +113,17 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
         <section className="game-center">
           <div className="top-row">
             <div className="category-box">Category: {category}</div>
+
+            <div className="timer-box" style={{ color: timeLeft <= 10 ? 'red' : 'inherit', fontWeight: 'bold', fontSize: '1.2rem' }}>
+              Time: {timeLeft}s
+            </div>
+
             <div className="status-box">
-              {isPlayerTurn ? "Your turn" : "Waiting for opponent"}
+              {timeLeft === 0 ? "Time is up!" : (isPlayerTurn ? "Your turn" : "Waiting for opponent")}
             </div>
           </div>
+
+
 
           <div className="word-area">
             <div className="word-blank-slots">
@@ -134,7 +155,7 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
               placeholder="Type the word here..."
               maxLength={20}
               autoComplete="off"
-              disabled={!isPlayerTurn}
+              disabled={isInputDisabled}
             />
 
             <div className="word-actions-row">
@@ -143,7 +164,7 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
               </div>
             </div>
 
-            <button className="primary-button" type="button">
+            <button className="primary-button" type="button" disabled={isInputDisabled}>
               Confirm Word
             </button>
           </div>
