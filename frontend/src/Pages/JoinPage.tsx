@@ -1,18 +1,23 @@
 import "../css/JoinPage.css";
-import copyIcon from "../assets/copy.svg";
+//import copyIcon from "../assets/copy.svg";
+import { useState } from "react";
 
 type JoinPageProps = {
-  onJoinGame: () => void;
+  onJoinGame: (gameId: string) => void;
+  onBack: () => void;
 };
 
-export function JoinPage({ onJoinGame }: JoinPageProps) {
+export function JoinPage({ onJoinGame, onBack }: JoinPageProps) {
+
+  const [inputId, setInputId] = useState("");
+
   return (
     <div className="join-container">
       <h1 className="join-title">Join Game</h1>
       <p className="tag-line">Enter the Game ID to join the match</p>
 
       <div className="form-section">
-        <div className="game-info-box">
+        {/* <div className="game-info-box">
           <p className="info-text">Share this Game ID with player 2:</p>
 
           <div className="game-id-display">
@@ -21,18 +26,29 @@ export function JoinPage({ onJoinGame }: JoinPageProps) {
               <img src={copyIcon} alt="Copy Game ID" />
             </button>
           </div>
-        </div>
+        </div> */}
 
         <div className="input-wrapper neon-border">
-          <input type="text"
+          <input
+            type="text"
             placeholder="Enter Game ID"
             className="game-id-input"
+            value={inputId}
+            onChange={(e) => setInputId(e.target.value)}
           />
         </div>
 
         <div className="button-group">
-          <button className="btn joining" type="button" onClick={onJoinGame}>
+          <button className="btn joining" type="button" onClick={() => onJoinGame(inputId)}>
             Join Game
+          </button>
+          <button
+            className="btn back"
+            type="button"
+            onClick={onBack}
+            style={{ marginTop: '10px' }}
+          >
+            Back
           </button>
         </div>
 

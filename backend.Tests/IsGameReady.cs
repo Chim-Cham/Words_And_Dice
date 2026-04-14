@@ -9,7 +9,7 @@ public class IsGameReadyTest
   public async Task IsGameReady_ShouldReturnFalse_WhenOnlyOnePlayerExists()
   {
     var service = new GameService();
-    var game = await service.CreateGame("TESTORD", "Spelare A");
+    var game = await service.CreateGame("Spelare A");
 
     var result = await service.IsGameReady(game.Id);
     Assert.False(result);
@@ -19,7 +19,7 @@ public class IsGameReadyTest
   public async Task IsGameReady_ShouldReturnTrue_WhenTwoPlayersExist()
   {
     var service = new GameService();
-    var game = await service.CreateGame("TESTORD", "Spelare A");
+    var game = await service.CreateGame("Spelare A");
     await service.JoinGame(game.Id, "Spelare B");
 
     var result = await service.IsGameReady(game.Id);
