@@ -15,6 +15,9 @@ public class Game : BaseModel
     [Column("target_word")]
     public string TargetWord { get; set; } = "";
 
+    [Column("category")]
+    public string Category { get; set; } = "";
+
     [Column("winning_score")]
     public int WinningScore { get; set; } = 100;
 

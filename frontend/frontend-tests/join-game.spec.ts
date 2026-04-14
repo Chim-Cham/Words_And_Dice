@@ -66,6 +66,21 @@ test.describe('Join Game Flow', () => {
       });
     });
 
+    await page.route('**/api/games/mitt-test-id', async route => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          id: 'mitt-test-id',
+          status: 'waiting',
+          targetWord: 'PLAYWRIGHT',
+          category: 'programming_languages',
+          winningScore: 100,
+          currentRound: 1
+        })
+      });
+    });
+
     await page.getByPlaceholder('Username').fill('TestSpelaren');
     await page.getByRole('button', { name: 'Join game' }).click();
 

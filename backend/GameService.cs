@@ -118,5 +118,28 @@ public class GameService
         var players = await GetPlayersInGame(gameId);
         return players.Count == 2;
     }
+
+    public async Task UpdateGameWord(string gameId, string word, string category)
+    {
+        var response = await _client.From<Game>().Where(g => g.Id == gameId).Get();
+        var game = response.Model;
+
+        if (game != null)
+        {
+            game.TargetWord = word;
+            game.Category = category;
+            await _client.From<Game>().Update(game);
+        }
+    }
+
+    public async Task<Game?> GetGameById(string gameId)
+    {
+        var response = await _client
+            .From<Game>()
+            .Where(x => x.Id == gameId)
+            .Get();
+
+        return response.Models.FirstOrDefault();
+    }
 }
 

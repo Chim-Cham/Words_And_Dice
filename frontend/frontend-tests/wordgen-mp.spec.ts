@@ -6,14 +6,13 @@ test.describe('Multiplayer word generation', () => {
   });
 
   test('joining a game shows mocked word and category', async ({ page }) => {
-    // Använde Mike's test kod för routingen :)
     await page.route('**/api/games/*/players?name=*', async (route: Route) => {
       await route.fulfill({
         status: 201,
         contentType: 'application/json',
         body: JSON.stringify({
           id: 'fejk-player-uuid-123',
-          gameId: 'fejk-game-uuid-456',
+          gameId: 'mitt-test-id',
           playerName: 'TestSpelaren',
           score: 0,
           lastGuess: null,
@@ -22,20 +21,32 @@ test.describe('Multiplayer word generation', () => {
       });
     });
 
-    // Mock ordet från API.et
-    const mockWord = [
-      { word: 'tiger', category: 'animals', length: 5 }
-    ];
-
-    await page.route('**/api/word/*/*', async (route: Route) => {
+    await page.route('**/api/games/*/players', async (route: Route) => {
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
-        body: JSON.stringify(mockWord)
+        body: JSON.stringify([
+          { id: 'host-uuid-999', playerName: 'Hosten', score: 0 },
+          { id: 'fejk-player-uuid-123', playerName: 'TestSpelaren', score: 0 }
+        ])
       });
     });
 
-    // Joinar först ett spel med ett giltigt ID
+    await page.route('**/api/games/mitt-test-id', async (route: Route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          id: 'mitt-test-id',
+          status: 'waiting',
+          targetWord: 'tiger',
+          category: 'animals',
+          winningScore: 100,
+          currentRound: 1
+        })
+      });
+    });
+
     await page.getByPlaceholder('Username').fill('TestSpelaren');
     await page.getByRole('button', { name: 'Join game' }).click();
 
@@ -43,14 +54,11 @@ test.describe('Multiplayer word generation', () => {
 
     await page.getByRole('button', { name: 'Join Game', exact: true }).click();
 
-    // Kollar så att det är på GamePage
     await expect(page.getByText('Level 1 / 25')).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Player 2' })).toBeVisible();
 
-    // Kollar så att kategorin visas
     await expect(page.getByText('Category: animals')).toBeVisible();
 
-    // Kollar antalet tomrum för bokstäverna samt att endast två ledtrådar ges
     const slots = page.locator('.word-blank-slot');
     await expect(slots).toHaveCount(5);
 
@@ -60,7 +68,7 @@ test.describe('Multiplayer word generation', () => {
     expect(revealedLetters.length).toBe(2);
 
     for (const letter of revealedLetters) {
-      expect('TIGER').toContain(letter);
+      expect('TIGER').toContain(letter.toUpperCase());
     }
   });
 });
