@@ -10,9 +10,9 @@ public static class DebugApi
     {
 
         /*Test api*/
-        app.MapPost("/debug/create-game", async (string word, string name, GameService gameService) =>
+        app.MapPost("/debug/create-game", async (string name, GameService gameService) =>
         {
-            var game = await gameService.CreateGame(word, name);
+            var game = await gameService.CreateGame(name);
             return Results.Ok(game);
         });
 

@@ -6,13 +6,14 @@ public class GameService
     private readonly Supabase.Client _client = SupabaseConfig.Instance;
 
     //create new game with game-id and player one with player-id
-    public async Task<Game> CreateGame(string word, string playerName)
+    public async Task<Game> CreateGame(string playerName)
     {
         var newGame = new Game
         {
-            TargetWord = word.ToUpper(),
+            TargetWord = "",
             Status = "waiting",
-            WinningScore = 100
+            WinningScore = 100,
+            CurrentRound = 1
         };
 
         var gameResponse = await _client.From<Game>().Insert(newGame);

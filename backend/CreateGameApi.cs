@@ -9,10 +9,27 @@ public static class CreateGameApi
     public static void CreateGameStart(this IEndpointRouteBuilder app)
     {
         // Create game
-        app.MapPost("/api/games", async (string word, string name, GameService gameService) =>
+        app.MapPost("/api/games", async (string name, GameService gameService) =>
         {
-            var game = await gameService.CreateGame(word, name);
-            return Results.Created($"/api/games/{game.Id}", game);
+            try
+            {
+                var game = await gameService.CreateGame(name);
+
+                var result = new GameDto
+                {
+                    Id = game.Id,
+                    Status = game.Status,
+                    TargetWord = game.TargetWord,
+                    WinningScore = game.WinningScore
+                };
+
+                return Results.Created($"/api/games/{result.Id}", result);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"ERROR: {ex.Message}");
+                return Results.Problem("Kunde inte skapa spel i databasen.");
+            }
         });
     }
 }

@@ -10,17 +10,18 @@ public class GameServiceIntegrationTests
     {
         // Arrange
         var service = new GameService();
-        string testWord = "TESTORD";
         string playerName = "Mikael_Test";
 
         // Act
-        var game = await service.CreateGame(testWord, playerName);
+        var game = await service.CreateGame(playerName);
 
         var playersInGame = await service.GetPlayersInGame(game.Id);
 
         Assert.NotNull(game.Id);
-        Assert.Equal(testWord, game.TargetWord);
+        Assert.Equal("", game.TargetWord);
         Assert.Equal(100, game.WinningScore);
+        Assert.Equal("waiting", game.Status);
+        Assert.Equal(1, game.CurrentRound);
 
         // Assert - Spelaren
         Assert.Single(playersInGame);
