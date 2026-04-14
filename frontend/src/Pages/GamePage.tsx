@@ -6,18 +6,47 @@ type GamePageProps = { onBack: () => void };
 export function GamePage({ onBack }: GamePageProps) {
   const [showInstructions, setShowInstructions] = useState(false);
 
-  // Endast enkel UI-demo just nu
-  const level = 1;
+  const [level, setLevel] = useState(1);
+  const [levelComplete, setLevelComplete] = useState(false);
+  const [playerPoints, setPlayerPoints] = useState(0);
+  const [inputValue, setInputValue] = useState("");
+  const [isWrong, setIsWrong] = useState(false);
+
+  // Kontrollerar spelarens gissning mot det rätta svaret.
+  // Ger +5 poäng vid rätt svar annars markeras fel.
+  function handleConfirmWord() {
+    const guess = inputValue.trim().toUpperCase();
+    if (guess === correctAnswer) {
+      setPlayerPoints((prev) => prev + 5);
+      setLevelComplete(true);
+      setIsWrong(false);
+    } else {
+      setIsWrong(true);
+    }
+  }
+
+  // Går nästa nivå
+  function handleNextLevel() {
+    if (level < 25) {
+      setLevel((l) => l + 1);
+      setLevelComplete(false);
+      setInputValue("");
+      setIsWrong(false);
+    }
+  }
+
+  //Speldata (tillfälligt hårdkodad, ska senare hämtas från backend/API)
   const category = "Animals";
   const isPlayerTurn = true;
-  const playerPoints = 0;
   const maxScore = 5;
-  const missingLetter = "A";
+  const missingLetter = "A"; // Bokstaven som visas som ledtråd
 
   // Exempelordet är CAT där C och T saknas
   const wordSlots = ["C", "A", "T"];
+  const correctAnswer = wordSlots.join(""); // Det kompletta ord spelaren ska gissa
   const wordLength = wordSlots.length;
-  const canUseHint = playerPoints >= wordLength;
+  // Spelaren behöver minst lika många poäng som ordets längd för att köpa ledtråd
+  const canUseHint = playerPoints >= wordLength; 
 
   return (
     <div className="game-page">
@@ -98,8 +127,19 @@ export function GamePage({ onBack }: GamePageProps) {
               placeholder="Type the word here..."
               maxLength={20}
               autoComplete="off"
-              disabled={!isPlayerTurn}
+              disabled={!isPlayerTurn || levelComplete}
+              value={inputValue}
+              onChange={(e) => {
+                setInputValue(e.target.value);
+                setIsWrong(false);
+              }}
             />
+
+            {isWrong && (
+              <p className="wrong-answer-text">
+                Wrong answer, try again!
+              </p>
+            )}
 
             <div className="word-actions-row">
               <div className="points-display-box">
@@ -107,9 +147,36 @@ export function GamePage({ onBack }: GamePageProps) {
               </div>
             </div>
 
-            <button className="primary-button" type="button">
+            <button
+              className="primary-button"
+              type="button"
+              onClick={handleConfirmWord}
+              disabled={levelComplete || inputValue.trim() === ""}
+            >
               Confirm Word
             </button>
+
+            {levelComplete && (
+              <div className="level-complete-panel">
+                <p className="correct-answer-text">
+                  Correct! +5
+                  points
+                </p>
+                {level >= 25 ? (
+                  <p>You Won! All 25 levels completed!</p>
+                ) : (
+                  <>
+                    <button
+                      className="primary-button"
+                      type="button"
+                      onClick={handleNextLevel}
+                    >
+                      Next Level
+                    </button>
+                  </>
+                )}
+              </div>
+            )}
           </div>
 
           {showInstructions && (
