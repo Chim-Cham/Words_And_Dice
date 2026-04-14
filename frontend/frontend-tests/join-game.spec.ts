@@ -25,6 +25,7 @@ test.describe('Join Game Flow', () => {
   });
 
   test('able to join game with valid game id', async ({ page }) => {
+
     await page.route('**/api/games/*/players?name=*', async route => {
       await route.fulfill({
         status: 201,
@@ -37,6 +38,31 @@ test.describe('Join Game Flow', () => {
           lastGuess: null,
           isRoundReady: false
         })
+      });
+    });
+
+    await page.route('**/api/word/*/*', async route => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify([
+          {
+            word: "PLAYWRIGHT",
+            category: "programming_languages",
+            length: 10
+          }
+        ])
+      });
+    });
+
+    await page.route('**/api/games/*/players', async route => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify([
+          { id: 'player-999', playerName: 'Host', score: 0 },
+          { id: 'fejk-player-uuid-123', playerName: 'TestSpelaren', score: 0 }
+        ])
       });
     });
 
