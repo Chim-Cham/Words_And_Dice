@@ -1,81 +1,16 @@
 .dice-word-row {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0;
+  gap: 12px;
+  align-items: flex-end;
   margin-bottom: 26px;
 }
 
-.dice-row,
-.word-slots-row {
-  display: flex;
-  gap: 12px;
-}
-
-
-.dice-col {
+.dice-slot-col {
+  position: relative;
   width: 62px;
+  height: 120px;
   display: flex;
-  justify-content: center;
   align-items: flex-end;
-  min-height: 80px;
-}
-
-.die-wrapper {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.die-face {
-  width: 48px;
-  height: 48px;
-  border-radius: 10px;
-  background: linear-gradient(135deg, #e74c3c, #c0392b);
-  color: #fff;
-  font-size: 1.4rem;
-  font-weight: 900;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow:
-    0 4px 14px rgba(231, 76, 60, 0.45),
-    0 2px 6px rgba(0, 0, 0, 0.5);
-  transition: box-shadow 0.3s;
-  user-select: none;
-}
-
-.die-face--rolling {
-  animation: die-shake 0.1s infinite alternate;
-  box-shadow:
-    0 0 18px rgba(231, 76, 60, 0.7),
-    0 4px 12px rgba(0, 0, 0, 0.6);
-}
-
-@keyframes die-shake {
-  from {
-    transform: rotate(-6deg) translateY(-2px);
-  }
-
-  to {
-    transform: rotate(6deg) translateY(2px);
-  }
-}
-
-.die-arrow {
-  width: 0;
-  height: 0;
-  border-left: 8px solid transparent;
-  border-right: 8px solid transparent;
-  border-top: 10px solid #c0392b;
-  margin-top: 2px;
-}
-
-.die-connector {
-  width: 2px;
-  height: 10px;
-  background: linear-gradient(to bottom, #c0392b, transparent);
-  opacity: 0.5;
 }
 
 .word-slot {
@@ -89,12 +24,8 @@
   justify-content: center;
   font-size: 26px;
   font-weight: 700;
-  color: #444;
-  transition:
-    border-color 0.3s,
-    color 0.3s,
-    background 0.3s,
-    transform 0.2s;
+  color: #ccc;
+  transition: border-color 0.3s, color 0.3s, background 0.3s;
 }
 
 .word-slot--revealed {
@@ -103,6 +34,68 @@
   color: #fff;
   box-shadow: 0 0 14px rgba(231, 76, 60, 0.3);
   animation: slot-pop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.word-slot--hidden {
+  border-color: transparent;
+  background: transparent;
+  color: transparent;
+}
+
+.die-face {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  transform: translateX(-50%);
+  width: 48px;
+  height: 48px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #e74c3c, #c0392b);
+  color: #fff;
+  font-size: 1.4rem;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 14px rgba(231, 76, 60, 0.45), 0 2px 6px rgba(0, 0, 0, 0.5);
+  user-select: none;
+}
+
+.die-face--rolling {
+  animation: die-shake 0.1s infinite alternate;
+  box-shadow: 0 0 18px rgba(231, 76, 60, 0.7), 0 4px 12px rgba(0, 0, 0, 0.6);
+}
+
+.die-face--idle {
+  transform: translateX(-50%) translateY(0px);
+}
+
+.die-face--sliding {
+  transform: translateX(-50%) translateY(75px);
+  transition: transform 0.8s ease-in;
+}
+
+.die-face--settled {
+  width: 62px;
+  height: 62px;
+  border-radius: 14px;
+  font-size: 26px;
+  left: 50%;
+  transform: translateX(-50%) translateY(56px);
+  transition: width 0.25s ease-out,
+    height 0.25s ease-out,
+    border-radius 0.25s ease-out,
+    font-size 0.25s ease-out;
+}
+
+@keyframes die-shake {
+  from {
+    transform: translateX(-50%) rotate(-6deg) translateY(-2px);
+  }
+
+  to {
+    transform: translateX(-50%) rotate(6deg) translateY(2px);
+  }
 }
 
 @keyframes slot-pop {

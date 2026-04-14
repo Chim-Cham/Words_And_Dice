@@ -4,32 +4,42 @@ import { useState, useEffect } from "react";
 const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZÅÄÖ";
 
 type Props = {
-  word: string;           // e.g. "KATT"
-  diceIndices: number[];  // which positions get a die, e.g. [1, 3]
+  word: string;
+  diceIndices: number[];
   rolling: boolean;
 };
 
-function Die({ letter, rolling }: { letter: string; rolling: boolean; }) {
+function DieSlot({ letter, rolling, hasDie }: { letter: string; rolling: boolean; hasDie: boolean }) {
   const [display, setDisplay] = useState("?");
+  const [phase, setPhase] = useState<"rolling" | "idle" | "sliding" | "settled">("rolling");
 
   useEffect(() => {
-    if (!rolling) {
+    if (rolling) {
+      setPhase("rolling");
+      const iv = setInterval(() => {
+        setDisplay(ALPHABET[Math.floor(Math.random() * ALPHABET.length)]);
+      }, 70);
+      return () => clearInterval(iv);
+    } else {
       setDisplay(letter);
-      return;
+      setPhase("idle");
+      const slide = setTimeout(() => setPhase("sliding"), 20);
+      const settle = setTimeout(() => setPhase("settled"), 820);
+      return () => { clearTimeout(slide); clearTimeout(settle); };
     }
-    const iv = setInterval(() => {
-      setDisplay(ALPHABET[Math.floor(Math.random() * ALPHABET.length)]);
-    }, 70);
-    return () => clearInterval(iv);
   }, [rolling, letter]);
 
   return (
-    <div className="die-wrapper">
-      <div className={`die-face${rolling ? " die-face--rolling" : ""}`}>
-        {display}
+    <div className="dice-slot-col">
+      <div className={`word-slot${phase === "settled" ? " word-slot--revealed" : ""}`}>
+        {!hasDie ? "·" : ""}
       </div>
-      <div className="die-arrow" />
-      <div className="die-connector" />
+
+      {hasDie && (
+        <div className={`die-face die-face--${phase}`}>
+          {display}
+        </div>
+      )}
     </div>
   );
 }
@@ -39,31 +49,14 @@ export function DiceWordRow({ word, diceIndices, rolling }: Props) {
 
   return (
     <div className="dice-word-row">
-      {/* Dice row */}
-      <div className="dice-row">
-        {letters.map((letter, i) => (
-          <div key={i} className="dice-col">
-            {diceIndices.includes(i) && (
-              <Die letter={letter} rolling={rolling} />
-            )}
-          </div>
-        ))}
-      </div>
-
-      {/* Word slots */}
-      <div className="word-slots-row">
-        {letters.map((letter, i) => {
-          const hasDie = diceIndices.includes(i);
-          return (
-            <div
-              key={i}
-              className={`word-slot${hasDie && !rolling ? " word-slot--revealed" : ""}`}
-            >
-              {hasDie && !rolling ? letter : "·"}
-            </div>
-          );
-        })}
-      </div>
+      {letters.map((letter, i) => (
+        <DieSlot
+          key={i}
+          letter={letter}
+          rolling={rolling}
+          hasDie={diceIndices.includes(i)}
+        />
+      ))}
     </div>
   );
 }
