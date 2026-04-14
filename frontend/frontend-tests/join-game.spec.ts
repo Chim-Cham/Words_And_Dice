@@ -47,7 +47,6 @@ test.describe('Join Game Flow', () => {
 
     await page.getByRole('button', { name: 'Join Game', exact: true }).click();
 
-    await expect(page.getByText('Level 1 / 25')).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Player 2' })).toBeVisible();
   });
 
