@@ -9,8 +9,6 @@ type GamePageProps = {
 
 };
 
-};
-
 type ApiWord = {
   word: string;
   category: string;
