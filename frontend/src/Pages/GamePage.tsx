@@ -1,11 +1,20 @@
 import { useState, useEffect } from "react";
 import "../css/GamePage.css";
 
+
 type GamePageProps = {
   gameId: string;
   playerId: string;
   onBack: () => void;
+
 };
+
+type ApiWord = {
+  word: string;
+  category: string;
+  length: number;
+};
+
 
 type Player = {
   id: string;
@@ -51,17 +60,81 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
   const isYouPlayer2 = player2?.id === playerId;
 
 
-  // Endast enkel UI-demo just nu
+  // Hämtar alla möjliga ord från API:et
+  const [currentWord, setCurrentWord] = useState<ApiWord | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [wordSlots, setWordSlots] = useState<string[]>([]);
+
+  // Det som tar fram ett random ord
+  const categories = ["brainrot", "countries", "capitals_of_countries", "sports", "animals", "programming_languages", "games", "pc_games", "mobile_games", "companies"];
+  const randomCategory = categories[Math.floor(Math.random() * categories.length)];
+
+  const randomLength = Math.floor(Math.random() * 8) + 3; // ordlängd på mellan 3-10 bokstäver (8 + 3)
+
+
+
+  // Tar fram två random bokstäver
+  function generateWordSlots(word: string) {
+    const letters = word.toUpperCase().split("");
+
+    const revealedIndexes = new Set<number>();
+    while (revealedIndexes.size < 2) {
+      revealedIndexes.add(Math.floor(Math.random() * letters.length));
+    }
+
+    return letters.map((letter, index) =>
+      revealedIndexes.has(index) ? letter : ""
+    );
+  }
+
+  useEffect(() => {
+    async function loadWord() {
+      try {
+        const res = await fetch(`http://localhost:5164/api/word/${randomCategory}/${randomLength}`);
+        const data = await res.json();
+
+        const wordObj = data[0];
+
+        setCurrentWord({
+          word: wordObj.word,
+          category: wordObj.category,
+          length: wordObj.length
+        });
+      } catch (err) {
+        console.error("Failed to fetch word:", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadWord();
+  }, []);
+
+  useEffect(() => {
+    if (currentWord) {
+      setWordSlots(generateWordSlots(currentWord.word));
+    }
+  }, [currentWord]);
+
+  if (loading || !currentWord) {
+    return (
+      <div className="game-page">
+        <p>Loading word...</p>
+      </div>
+    );
+  }
+
+
+
+
+  const wordLength = currentWord.length;
+
+  // Detta är samma som innan
   const level = 1;
-  const category = "Animals";
+  const category = currentWord.category;
   const isPlayerTurn = true;
   const playerPoints = 0;
   const maxScore = 5;
-  const missingLetter = "A";
-
-  // Exempelordet är CAT där C och T saknas
-  const wordSlots = ["C", "A", "T"];
-  const wordLength = wordSlots.length;
   const canUseHint = playerPoints >= wordLength;
 
   const isInputDisabled = !isPlayerTurn || timeLeft === 0;
@@ -127,12 +200,12 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
 
           <div className="word-area">
             <div className="word-blank-slots">
-              {wordSlots.map((letter, index) => (
+              {wordSlots.map((letter, index) => ( // Var tvungen att ändra denna div:n
                 <div
                   key={index}
-                  className={`word-blank-slot${letter === missingLetter ? " word-blank-slot--given" : ""}`}
+                  className={`word-blank-slot${letter ? " word-blank-slot--given" : ""}`}
                 >
-                  {letter === missingLetter ? missingLetter : ""}
+                  {letter}
                 </div>
               ))}
             </div>
