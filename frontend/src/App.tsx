@@ -19,10 +19,21 @@ function App() {
       if (!response.ok) throw new Error("Kunde inte skapa spel");
 
       const gameData = await response.json();
-
       const idFromServer = gameData.id || gameData.Id;
+
       if (idFromServer) {
         setGameId(idFromServer);
+        try {
+          const playerRes = await fetch(`http://localhost:5164/api/games/${idFromServer}/players`);
+          if (playerRes.ok) {
+            const players = await playerRes.json();
+            if (players.length > 0) {
+              setPlayerId(players[0].id || players[0].Id);
+            }
+          }
+        } catch (err) {
+          console.error("Kunde inte hämta hostens playerId", err);
+        }
         setPage("invite");
       } else {
         console.error("Inget ID hittades i svaret:", gameData);
@@ -69,7 +80,13 @@ function App() {
   }
 
   if (page === "game") {
-    return <GamePage onBack={() => setPage("start")} />;
+    return (
+      <GamePage
+        gameId={gameId}
+        playerId={playerId}
+        onBack={() => setPage("start")}
+      />
+    );
   }
 
   if (page === "join") {
