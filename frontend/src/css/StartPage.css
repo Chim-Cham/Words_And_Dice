@@ -30,6 +30,7 @@ body {
 /* style for C */
 .title .parenthese {
   color: rgba(18, 3, 3, 0.425);
+  animation: neon-flicker 6s infinite;
 }
 
 .tag-line {
@@ -180,4 +181,30 @@ body {
 .btn.Start:hover {
   background-color: rgb(44, 221, 44);
   transform: translateY(-5px);
+}
+
+.btn.Join {
+  background-color: rgb(224, 232, 224);
+  color: rgb(0, 0, 0);
+}
+
+.btn.Join:hover {
+  background-color: rgb(44, 221, 44);
+  transform: translateY(-5px);
+}
+
+/*animation*/
+
+@keyframes neon-flicker {
+  0%, 18%, 22%, 25%, 53%, 57%, 100% {
+    color: rgba(18, 3, 3, 0.425);
+    text-shadow: none;
+  }
+  20%, 24%, 55% {
+    color: rgb(136, 22, 22);
+    text-shadow:
+      0 0 10px rgba(153, 12, 12, 0.6),
+      0 0 20px rgba(235, 18, 18, 0.4),
+      0 0 40px rgba(70, 4, 4, 0.2);
+  }
 }

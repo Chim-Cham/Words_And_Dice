@@ -54,7 +54,8 @@ public static class UtilApi
                     Status = game.Status,
                     TargetWord = game.TargetWord,
                     WinningScore = game.WinningScore,
-                    Category = game.Category
+                    Category = game.Category,
+                    CurrentRound = game.CurrentRound
                 };
 
                 return Results.Ok(result);

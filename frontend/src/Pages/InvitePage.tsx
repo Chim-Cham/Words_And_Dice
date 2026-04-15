@@ -5,12 +5,14 @@ import { useEffect, useState } from "react";
 type InvitePageProps = {
   gameId: string;
   onContinue: () => void;
+  onBack: () => void;
 };
 
 
-export function InvitePage({ gameId, onContinue }: InvitePageProps) {
+export function InvitePage({ gameId, onContinue, onBack }: InvitePageProps) {
   const [isReady, setIsReady] = useState(false);
   const inviteLink = `${window.location.origin}/join/${gameId}`;
+  const inviteGuidCopy = `${gameId}`;
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
@@ -40,16 +42,18 @@ export function InvitePage({ gameId, onContinue }: InvitePageProps) {
   return (
     <div className="invite-container">
       <h1 className="title">Invite player 2 to join your game</h1>
-      <p className="tag-line">Share this link with your friend</p>
+      <div className="placment-tag">
+        <p className="tag-line">Share this link with your friend</p>
+      </div>
 
-      <div className="form-section">
+      <div className="form-section-inv">
 
         <div className="info-box">
           <p className="info-label">Game ID:</p>
 
           <div className="info-row">
             <span className="info-value">{gameId}</span>
-            <button className="copy-btn" onClick={() => copyToClipboard(inviteLink)}>
+            <button className="copy-btn" onClick={() => copyToClipboard(inviteGuidCopy)}>
               <img src={copyIcon} alt="Copy" />
             </button>
           </div>
@@ -72,7 +76,19 @@ export function InvitePage({ gameId, onContinue }: InvitePageProps) {
             onClick={onContinue}
             disabled={!isReady}
           >
-            {isReady ? "Start Game" : "Waiting for Player 2..."}
+            <div className="waiting-for-player-container">
+              <span className="loader"></span>
+              {isReady ? "Start Game" : "Waiting for Player 2..."}
+            </div>
+          </button>
+
+          <button
+            className="btn back"
+            type="button"
+            onClick={onBack}
+            style={{ marginTop: '10px' }}
+          >
+            Back
           </button>
         </div>
 
