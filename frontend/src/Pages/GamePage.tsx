@@ -100,8 +100,29 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
     );
   }
 
+  async function handleConfirm() {
+    if (!currentWord) return;
 
+    const correct = currentWord.word.toLowerCase();
+    const attempt = guess.toLowerCase();
 
+    if (attempt !== correct) {
+      const newScore = Math.max(0, playerPoints - 5);
+
+      try {
+        await fetch(`http://localhost:5164/api/players/${playerId}/submit-round?newScore=${newScore}`,
+          { method: "POST" }
+        );
+
+        setPlayerPoints(newScore);
+        setGuess("");
+      } catch (err) {
+        console.error("Failed to update score: ", err);
+      }
+
+      return;
+    }
+  }
 
   const wordLength = currentWord.length;
 
@@ -203,7 +224,7 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
               </div>
             </div>
 
-            <button className="primary-button" type="button">
+            <button className="primary-button" type="button" onClick={handleConfirm}>
               Confirm Word
             </button>
           </div>
