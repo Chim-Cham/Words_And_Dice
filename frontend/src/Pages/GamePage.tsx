@@ -172,7 +172,7 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
   }, []);
 
 
-  if (loading || !currentWord) {
+  if (!hasLoadedPlayers || loading || !currentWord) {
     return (
       <div className="game-page">
         <div className="loading-container">
