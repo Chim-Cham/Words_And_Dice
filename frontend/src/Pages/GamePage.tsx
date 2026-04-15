@@ -27,6 +27,7 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
   const [showInstructions, setShowInstructions] = useState(false);
   const [players, setPlayers] = useState<Player[]>([]);
   const [timeLeft, setTimeLeft] = useState(45); //change here if we need to have a longer display time
+  //const [gameInfo, setGameInfo] = useState<any>(null);
 
   useEffect(() => {
     async function fetchPlayers() {
@@ -56,6 +57,7 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
 
   const player1 = players[0];
   const player2 = players[1];
+  const hasLoadedPlayers = players.length > 0;
 
   const isYouPlayer1 = player1?.id === playerId;
   const isYouPlayer2 = player2?.id === playerId;
@@ -73,7 +75,30 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
 
   const randomLength = Math.floor(Math.random() * 8) + 3; // ordlängd på mellan 3-10 bokstäver (8 + 3)
 
+  //send word to database
+  useEffect(() => {
+    const syncGame = async () => {
+      try {
+        const res = await fetch(`http://localhost:5164/api/games/${gameId}`);
+        if (res.ok) {
+          const data = await res.json();
+          //setGameInfo(data);
 
+          // Om du är Player 2 och ordet har dykt upp i databasen
+          if (!isYouPlayer1 && data.targetWord && !currentWord) {
+            setCurrentWord({
+              word: data.targetWord,
+              category: data.category,
+              length: data.targetWord.length
+            });
+            setLoading(false);
+          }
+        }
+      } catch (err) { console.error(err); }
+    };
+    const interval = setInterval(syncGame, 1000);
+    return () => clearInterval(interval);
+  }, [gameId, isYouPlayer1, currentWord]);
 
   // Tar fram två random bokstäver
   function generateWordSlots(word: string) {
@@ -102,6 +127,7 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
 
 
   useEffect(() => {
+    if (!isYouPlayer1) return;
     async function loadWord() {
       try {
         const res = await fetch(`http://localhost:5164/api/word/${randomCategory}/${randomLength}`);
@@ -109,11 +135,19 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
 
         const wordObj = data[0];
 
-        setCurrentWord({
+        const newWord = {
           word: wordObj.word,
           category: wordObj.category,
           length: wordObj.length
+        };
+        setCurrentWord(newWord);
+
+        await fetch(`http://localhost:5164/api/games/${gameId}/word`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(newWord)
         });
+
       } catch (err) {
         console.error("Failed to fetch word:", err);
       } finally {
@@ -122,7 +156,7 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
     }
 
     loadWord();
-  }, []);
+  }, [isYouPlayer1]);
 
   useEffect(() => {
     if (currentWord) {
@@ -138,10 +172,14 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
   }, []);
 
 
-  if (loading || !currentWord) {
+  if (!hasLoadedPlayers || loading || !currentWord) {
     return (
       <div className="game-page">
-        <p>Loading word...</p>
+        <div className="loading-container">
+          <p>Loading word...</p>
+          {!hasLoadedPlayers && <p style={{ fontSize: '12px' }}>Syncing players...</p>}
+          {hasLoadedPlayers && !currentWord && <p style={{ fontSize: '12px' }}>Waiting for Host to pick a word...</p>}
+        </div>
       </div>
     );
   }
