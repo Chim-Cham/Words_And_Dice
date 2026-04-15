@@ -75,6 +75,14 @@ export class GamePage {
       }
     });
 
+    await this.page.route("**/api/players/*/submit-round**", async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ message: "Score updated" })
+      });
+    });
+
     // Kör UI-stegen
     await this.page.goto("/");
     await this.page.getByPlaceholder("Username").fill("PlaywrightUser");
