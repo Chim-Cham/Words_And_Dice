@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import "../css/GamePage.css";
-
+import { DiceWordRow } from "../components/DiceWordRow";
 
 type GamePageProps = {
   gameId: string;
@@ -14,6 +14,7 @@ type ApiWord = {
   category: string;
   length: number;
 };
+
 
 
 type Player = {
@@ -59,11 +60,12 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
   const isYouPlayer1 = player1?.id === playerId;
   const isYouPlayer2 = player2?.id === playerId;
 
-
   // Hämtar alla möjliga ord från API:et
   const [currentWord, setCurrentWord] = useState<ApiWord | null>(null);
   const [loading, setLoading] = useState(true);
   const [wordSlots, setWordSlots] = useState<string[]>([]);
+  const [rolling, setRolling] = useState(true);
+  const [diceIndices, setDiceIndices] = useState<number[]>([]);
 
   // Det som tar fram ett random ord
   const categories = ["brainrot", "countries", "capitals_of_countries", "sports", "animals", "programming_languages", "games", "pc_games", "mobile_games", "companies"];
@@ -86,6 +88,18 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
       revealedIndexes.has(index) ? letter : ""
     );
   }
+  function randomIndices(slots: string[]) {
+    const indices = slots.map((_, i) => i);
+    indices.sort(() => Math.random() - 0.5);
+    return indices.slice(0, 2);
+  }
+
+  function reroll() {
+    setDiceIndices(randomIndices(wordSlots));
+    setRolling(true);
+    setTimeout(() => setRolling(false), 1400);
+  }
+
 
   useEffect(() => {
     async function loadWord() {
@@ -112,9 +126,17 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
 
   useEffect(() => {
     if (currentWord) {
-      setWordSlots(generateWordSlots(currentWord.word));
+      const slots = generateWordSlots(currentWord.word);
+      setWordSlots(slots);
+      setDiceIndices(randomIndices(slots));
     }
   }, [currentWord]);
+
+  useEffect(() => {                                     // ← and this
+    const t = setTimeout(() => setRolling(false), 1400);
+    return () => clearTimeout(t);
+  }, []);
+
 
   if (loading || !currentWord) {
     return (
@@ -181,6 +203,11 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
               </p>
             )}
           </div>
+          {/* THIS IS TEMPORARY FOR TESTING REMOVE BEFORE PUSH TO MAIN*/}
+          <button className="back-button" type="button" onClick={reroll}
+            style={{ left: "auto", right: 20 }}>
+            Reroll
+          </button>
         </aside>
 
         <section className="game-center">
@@ -199,16 +226,11 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
 
 
           <div className="word-area">
-            <div className="word-blank-slots">
-              {wordSlots.map((letter, index) => ( // Var tvungen att ändra denna div:n
-                <div
-                  key={index}
-                  className={`word-blank-slot${letter ? " word-blank-slot--given" : ""}`}
-                >
-                  {letter}
-                </div>
-              ))}
-            </div>
+            <DiceWordRow
+              word={currentWord.word.toUpperCase()}
+              diceIndices={diceIndices}
+              rolling={rolling}
+            />
 
             <div className="word-top-row">
               <p className="section-title">Build the hidden word</p>
