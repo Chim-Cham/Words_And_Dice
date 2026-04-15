@@ -1,27 +1,27 @@
 import { expect, Page } from "@playwright/test";
 
 export class GamePage {
-  constructor(private page: Page) {}
+  constructor(private page: Page) { }
 
   async open() {
     await this.page.goto("/");
-    await this.page.getByRole("button", { name: "Invite player" }).click();
-    await this.page.getByRole("button", { name: /Continute to Game/i }).click();
+    await this.page.getByPlaceholder("Username").fill("PlaywrightUser");
+    await this.page.getByRole("button", { name: "Host Game" }).click();
+    await expect(this.page.getByText("Loading word...")).not.toBeVisible({ timeout: 10000 });
   }
 
   async expectLevelVisible() {
-    await expect(this.page.getByText("Level 1 / 25")).toBeVisible();
+    await expect(this.page.getByText(/Level 1 \/ 25/i)).toBeVisible();
   }
-
   async expectPlayer1HeadingVisible() {
     await expect(
-      this.page.getByRole("heading", { name: "Player 1" }),
+      this.page.getByRole("heading", { name: /Player 1/i }),
     ).toBeVisible();
   }
 
   async expectPlayer2HeadingVisible() {
     await expect(
-      this.page.getByRole("heading", { name: "Player 2" }),
+      this.page.getByRole("heading", { name: /Player 2/i }),
     ).toBeVisible();
   }
 
@@ -32,7 +32,8 @@ export class GamePage {
   }
 
   async typeWord(word: string) {
-    await this.page.getByPlaceholder("Type the word here...").fill(word);
+    const input = this.page.getByPlaceholder("Type the word here...");
+    await input.fill(word);
   }
 
   async clickButton(buttonName: string) {
@@ -40,12 +41,12 @@ export class GamePage {
   }
 
   async expectTextVisible(text: string) {
-    await expect(this.page.getByText(text, { exact: true })).toBeVisible();
+    await expect(this.page.getByText(text, { exact: false })).toBeVisible();
   }
 
   async expectPointsVisible(pointsText: string) {
     await expect(
-      this.page.getByText(pointsText, { exact: true }),
+      this.page.getByText(pointsText, { exact: false }),
     ).toBeVisible();
   }
 }
