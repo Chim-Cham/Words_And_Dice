@@ -4,8 +4,33 @@ export class GamePage {
   constructor(private page: Page) { }
 
   async open() {
-    // 1. Mocka API-anropet för ordet innan vi navigerar in i spelet.
-    // Detta garanterar att spelet laddas omedelbart i pipelinen utan en riktig backend.
+    // 1. Mocka: Skapa ett spel ("Host Game" klicket)
+    await this.page.route("**/api/games", async (route) => {
+      await route.fulfill({
+        status: 201,
+        contentType: "application/json",
+        body: JSON.stringify({
+          id: "fake-game-id-123",
+          status: "waiting",
+          targetWord: "",
+          winningScore: 100,
+          currentRound: 1
+        }),
+      });
+    });
+
+    // 2. Mocka: Hämta spelarlistan (så hasLoadedPlayers blir sant)
+    await this.page.route("**/api/games/*/players", async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify([
+          { id: "player-1-id", playerName: "PlaywrightUser", score: 0 }
+        ]),
+      });
+    });
+
+    // 3. Mocka: Hämta ett slumpmässigt ord
     await this.page.route("**/api/word/*/*", async (route) => {
       await route.fulfill({
         status: 200,
@@ -14,15 +39,20 @@ export class GamePage {
       });
     });
 
-    // 2. Gå till startsidan
-    await this.page.goto("/");
+    // 4. Mocka: Spara ordet till backenden (detta är vad som förmodligen orsakade timeouten!)
+    await this.page.route("**/api/games/*/word", async (route) => {
+      await route.fulfill({
+        status: 200,
+        body: "OK"
+      });
+    });
 
-    // 3. Logga in (Krävs för att Host-knappen ska aktiveras)
+    // Kör UI-stegen
+    await this.page.goto("/");
     await this.page.getByPlaceholder("Username").fill("PlaywrightUser");
     await this.page.getByRole("button", { name: "Host Game" }).click();
 
-    // 4. Vänta tills laddningsskärmen är borta och spelplanen faktiskt syns.
-    // Vi väntar på kategoriboxen eftersom den indikerar att currentWord har laddats.
+    // Nu kan vi vänta på kategoriboxen, för alla nätverksanrop kommer besvaras direkt!
     await this.page.locator(".category-box").waitFor({ state: "visible", timeout: 15000 });
   }
 
