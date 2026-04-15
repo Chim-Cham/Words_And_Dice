@@ -59,11 +59,13 @@ test.describe('Multiplayer word generation', () => {
 
     await expect(page.getByText('Category: animals')).toBeVisible();
 
-    const slots = page.locator('.word-blank-slot');
+    // Kollar antalet tomrum för bokstäverna samt att endast två ledtrådar ges
+    const slots = page.locator('.word-slot');
     await expect(slots).toHaveCount(5);
 
-    const slotValues = await slots.allTextContents();
-    const revealedLetters = slotValues.filter(x => x.trim() !== '');
+    const dieFaces = page.locator('.die-face');
+    await page.waitForTimeout(2000);
+    const revealedLetters = await dieFaces.allTextContents();
 
     expect(revealedLetters.length).toBe(2);
 
