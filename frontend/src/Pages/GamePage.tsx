@@ -218,7 +218,17 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
     const p1Ready = players[0]?.isRoundReady;
     const p2Ready = players[1]?.isRoundReady;
 
+    const hasWinner = players[0]?.score >= 100 || players[1]?.score >= 100;
+    const isLastRound = level >= 25;
+
     if (p1Ready && p2Ready && !isTransitioning) {
+
+      if (p1Ready && p2Ready && !isTransitioning) {
+        if (hasWinner || isLastRound) {
+          return;
+        }
+      }
+
       setIsTransitioning(true);
       fetch(`http://localhost:5164/api/games/${gameId}/next-round`, { method: "POST" })
         .then(() => setTimeout(() => setIsTransitioning(false), 2000)) // Pausa låset i 2s
@@ -227,7 +237,7 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
           setIsTransitioning(false);
         });
     }
-  }, [players, isYouPlayer1, isTransitioning, gameId]);
+  }, [players, isYouPlayer1, isTransitioning, gameId, level]);
 
   useEffect(() => {
     if (currentWord) {
@@ -266,9 +276,20 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
   const maxScore = 5;
   const canUseHint = playerPoints >= wordLength;
 
+  const bothReady = player1?.isRoundReady && player2?.isRoundReady;
+  const isGameOver = bothReady && (level >= 25 || (player1?.score >= 100 || player2?.score >= 100));
+  let winnerText = "";
+  if (isGameOver) {
+    if (player1.score > player2.score) {
+      winnerText = `${player1.playerName} Wins with ${player1.score} pts!`;
+    } else if (player2.score > player1.score) {
+      winnerText = `${player2.playerName} Wins with ${player2.score} pts!`;
+    } else {
+      winnerText = `It's a Tie! (${player1.score} pts)`;
+    }
+  }
+
   const isInputDisabled = !isPlayerTurn || timeLeft === 0 || levelComplete || waitingForOpponent;
-
-
 
   return (
     <div className="game-page">
@@ -390,16 +411,29 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
 
             {waitingForOpponent && (
               <div className="level-complete-panel" style={{ marginTop: "15px" }}>
-                {levelComplete ? (
-                  <p className="correct-answer-text">Correct! +5 points</p>
+                {!isGameOver ? (
+                  <>
+                    {levelComplete ? (
+                      <p className="correct-answer-text">Correct! +5 points</p>
+                    ) : (
+                      <p className="wrong-answer-text">Time is up!</p>
+                    )}
+                    <p>Waiting for Player {isYouPlayer1 ? "2" : "1"}...</p>
+                  </>
                 ) : (
-                  <p className="wrong-answer-text">Time is up!</p>
-                )}
 
-                {level >= 25 ? (
-                  <p>Game Over! All 25 levels completed!</p>
-                ) : (
-                  <p>Waiting for Player {isYouPlayer1 ? "2" : "1"}...</p>
+                  <div className="game-over-content" style={{ textAlign: "center" }}>
+                    <h2 style={{ color: "#ffd700", marginBottom: "10px", fontSize: "2rem" }}>
+                      Game Over!
+                    </h2>
+                    <h3 style={{ fontSize: "1.5rem", marginBottom: "20px", color: "white" }}>
+                      {winnerText}
+                    </h3>
+                    <button className="primary-button" onClick={onBack}>
+                      Return to Start
+                    </button>
+                  </div>
+
                 )}
               </div>
             )}
