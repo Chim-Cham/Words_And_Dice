@@ -4,19 +4,29 @@ export class GamePage {
   constructor(private page: Page) { }
 
   async open() {
-    // 1. Mocka: Skapa ett spel ("Host Game" klicket)
-    await this.page.route("**/api/games", async (route) => {
-      await route.fulfill({
-        status: 201,
-        contentType: "application/json",
-        body: JSON.stringify({
-          id: "fake-game-id-123",
-          status: "waiting",
-          targetWord: "",
-          winningScore: 100,
-          currentRound: 1
-        }),
-      });
+    // Sätt fasta ID:n så att appen vet exakt vem som är vem
+    const MOCK_GAME_ID = "test-game-id";
+    const MOCK_PLAYER_ID = "player-1";
+
+    // 1. Mocka: Skapa spelet ("Host Game" klicket)
+    // Fångar anrop till /api/games oavsett query-parametrar
+    await this.page.route("**/api/games**", async (route) => {
+      if (route.request().method() === "POST") {
+        await route.fulfill({
+          status: 201,
+          contentType: "application/json",
+          body: JSON.stringify({
+            id: MOCK_GAME_ID,
+            status: "waiting",
+            targetWord: "",
+            winningScore: 100,
+            currentRound: 1,
+            playerId: MOCK_PLAYER_ID // Matchar spelarlistan nedan!
+          }),
+        });
+      } else {
+        await route.continue();
+      }
     });
 
     // 2. Mocka: Hämta spelarlistan (så hasLoadedPlayers blir sant)
@@ -25,7 +35,8 @@ export class GamePage {
         status: 200,
         contentType: "application/json",
         body: JSON.stringify([
-          { id: "player-1-id", playerName: "PlaywrightUser", score: 0 }
+          { id: MOCK_PLAYER_ID, playerName: "PlaywrightUser", score: 0 },
+          { id: "player-2", playerName: "Spelare2", score: 0 } // Bra för UI-testerna att ha en Player 2!
         ]),
       });
     });
@@ -39,12 +50,29 @@ export class GamePage {
       });
     });
 
-    // 4. Mocka: Spara ordet till backenden (detta är vad som förmodligen orsakade timeouten!)
+    // 4. Mocka: Spara ordet till backenden
     await this.page.route("**/api/games/*/word", async (route) => {
-      await route.fulfill({
-        status: 200,
-        body: "OK"
-      });
+      await route.fulfill({ status: 200, body: "OK" });
+    });
+
+    // 5. Mocka: Pollingen (GET på själva spelet, fångar upp ifall React fastnar)
+    await this.page.route(`**/api/games/${MOCK_GAME_ID}`, async (route) => {
+      if (route.request().method() === "GET") {
+        await route.fulfill({
+          status: 200,
+          contentType: "application/json",
+          body: JSON.stringify({
+            id: MOCK_GAME_ID,
+            status: "playing",
+            targetWord: "CAT",
+            category: "Animals",
+            winningScore: 100,
+            currentRound: 1
+          })
+        });
+      } else {
+        await route.continue();
+      }
     });
 
     // Kör UI-stegen
@@ -52,7 +80,7 @@ export class GamePage {
     await this.page.getByPlaceholder("Username").fill("PlaywrightUser");
     await this.page.getByRole("button", { name: "Host Game" }).click();
 
-    // Nu kan vi vänta på kategoriboxen, för alla nätverksanrop kommer besvaras direkt!
+    // Nu kan vi vänta på kategoriboxen, alla nätverksanrop kommer besvaras direkt!
     await this.page.locator(".category-box").waitFor({ state: "visible", timeout: 15000 });
   }
 
