@@ -1,7 +1,7 @@
 namespace wndgame;
 using System.Net.Http;
 
-public static class API
+public static class WordAPI
 {
     public static void WordGenerator(this WebApplication app)
     {

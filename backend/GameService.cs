@@ -6,13 +6,14 @@ public class GameService
     private readonly Supabase.Client _client = SupabaseConfig.Instance;
 
     //create new game with game-id and player one with player-id
-    public async Task<Game> CreateGame(string word, string playerName)
+    public async Task<Game> CreateGame(string playerName)
     {
         var newGame = new Game
         {
-            TargetWord = word.ToUpper(),
+            TargetWord = "",
             Status = "waiting",
-            WinningScore = 100
+            WinningScore = 100,
+            CurrentRound = 1
         };
 
         var gameResponse = await _client.From<Game>().Insert(newGame);
@@ -116,6 +117,29 @@ public class GameService
     {
         var players = await GetPlayersInGame(gameId);
         return players.Count == 2;
+    }
+
+    public async Task UpdateGameWord(string gameId, string word, string category)
+    {
+        var response = await _client.From<Game>().Where(g => g.Id == gameId).Get();
+        var game = response.Model;
+
+        if (game != null)
+        {
+            game.TargetWord = word;
+            game.Category = category;
+            await _client.From<Game>().Update(game);
+        }
+    }
+
+    public async Task<Game?> GetGameById(string gameId)
+    {
+        var response = await _client
+            .From<Game>()
+            .Where(x => x.Id == gameId)
+            .Get();
+
+        return response.Models.FirstOrDefault();
     }
 }
 

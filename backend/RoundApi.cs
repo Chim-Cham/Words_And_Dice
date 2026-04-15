@@ -33,5 +33,11 @@ public static class RoundApi
                 return Results.BadRequest(new { error = ex.Message });
             }
         });
+
+        app.MapPost("/api/games/{gameId}/word", async (string gameId, ApiWord wordDto, GameService gameService) =>
+        {
+            await gameService.UpdateGameWord(gameId, wordDto.word, wordDto.category);
+            return Results.Ok();
+        });
     }
 }
