@@ -354,6 +354,24 @@ body {
   box-shadow: 0 0 16px rgba(0, 0, 0, 0.18);
 }
 
+.wrong-answer-text {
+  color: #ff4444;
+  margin: 0 0 12px;
+  font-weight: 600;
+}
+
+.correct-answer-text {
+  color: #4cff72;
+  font-weight: 700;
+  margin: 0 0 12px;
+}
+
+.next-level-bonus-text {
+  color: #aaa;
+  font-size: 14px;
+  margin: 0 0 10px;
+}
+
 .instructions-panel p {
   margin: 0;
   color: white;

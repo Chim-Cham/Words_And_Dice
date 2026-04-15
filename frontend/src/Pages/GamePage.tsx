@@ -29,6 +29,38 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
   const [timeLeft, setTimeLeft] = useState(45); //change here if we need to have a longer display time
   //const [gameInfo, setGameInfo] = useState<any>(null);
 
+  const [level, setLevel] = useState(1);
+  const [levelComplete, setLevelComplete] = useState(false);
+  const [playerPoints, setPlayerPoints] = useState(0);
+  const [inputValue, setInputValue] = useState("");
+  const [isWrong, setIsWrong] = useState(false);
+
+  // Kontrollerar spelarens gissning mot det rätta svaret.
+  // Ger +5 poäng vid rätt svar annars markeras fel.
+  function handleConfirmWord() {
+    const guess = inputValue.trim().toUpperCase();
+    if (guess === correctAnswer) {
+      setPlayerPoints((prev) => prev + 5);
+      setLevelComplete(true);
+      setIsWrong(false);
+    } else {
+      setIsWrong(true);
+    }
+  }
+
+  // Går nästa nivå
+  function handleNextLevel() {
+    if (level < 25) {
+      setLevel((l) => l + 1);
+      setLevelComplete(false);
+      setInputValue("");
+      setIsWrong(false);
+      setTimeLeft(45);
+      setLoading(true);
+    }
+  }
+
+
   useEffect(() => {
     async function fetchPlayers() {
       try {
@@ -156,7 +188,7 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
     }
 
     loadWord();
-  }, [isYouPlayer1]);
+  }, [isYouPlayer1, level]);
 
   useEffect(() => {
     if (currentWord) {
@@ -188,16 +220,13 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
 
 
   const wordLength = currentWord.length;
-
-  // Detta är samma som innan
-  const level = 1;
+  const correctAnswer = currentWord.word.toUpperCase();
   const category = currentWord.category;
   const isPlayerTurn = true;
-  const playerPoints = 0;
   const maxScore = 5;
   const canUseHint = playerPoints >= wordLength;
 
-  const isInputDisabled = !isPlayerTurn || timeLeft === 0;
+  const isInputDisabled = !isPlayerTurn || timeLeft === 0 || levelComplete;
 
 
 
@@ -289,7 +318,18 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
               maxLength={20}
               autoComplete="off"
               disabled={isInputDisabled}
+              value={inputValue}
+              onChange={(e) => {
+                setInputValue(e.target.value);
+                setIsWrong(false);
+              }}
             />
+
+            {isWrong && (
+              <p className="wrong-answer-text">
+                Wrong answer, try again!
+              </p>
+            )}
 
             <div className="word-actions-row">
               <div className="points-display-box">
@@ -297,9 +337,38 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
               </div>
             </div>
 
-            <button className="primary-button" type="button" disabled={isInputDisabled}>
+            <button
+              className="primary-button"
+              type="button"
+              onClick={handleConfirmWord}
+              disabled={levelComplete || inputValue.trim() === ""}
+            >
+              {/* </button><button className="primary-button" type="button" disabled={isInputDisabled}> */}
+
               Confirm Word
             </button>
+
+            {levelComplete && (
+              <div className="level-complete-panel">
+                <p className="correct-answer-text">
+                  Correct! +5
+                  points
+                </p>
+                {level >= 25 ? (
+                  <p>You Won! All 25 levels completed!</p>
+                ) : (
+                  <>
+                    <button
+                      className="primary-button"
+                      type="button"
+                      onClick={handleNextLevel}
+                    >
+                      Next Level
+                    </button>
+                  </>
+                )}
+              </div>
+            )}
           </div>
 
           {showInstructions && (
