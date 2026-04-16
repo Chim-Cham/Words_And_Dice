@@ -57,13 +57,13 @@ public class GameService
             .Where(x => x.GameId == gameId)
             .Get();
 
-        return response.Models;
+        return response.Models ?? new List<Player>();
     }
     //Game list
     public async Task<List<Game>> GetAllGames()
     {
         var response = await _client.From<Game>().Get();
-        return response.Models;
+        return response.Models ?? new List<Game>();
     }
 
     public async Task<Player> SubmitRoundResult(string playerId, int newTotalScore)
@@ -73,7 +73,7 @@ public class GameService
             .Where(p => p.Id == playerId)
             .Get();
 
-        var player = response.Model;
+        var player = response.Models?.FirstOrDefault();
 
         if (player == null)
         {
@@ -85,7 +85,7 @@ public class GameService
 
         var updateResponse = await _client.From<Player>().Update(player);
 
-        return updateResponse.Model!;
+        return updateResponse.Models.First();
     }
 
     public async Task StartNextRound(string gameId)
@@ -95,22 +95,18 @@ public class GameService
         foreach (var player in players)
         {
             player.IsRoundReady = false;
-            // Om du har lagt till LastGuess, kan det vara bra att tömma den här också
             player.LastGuess = null;
-
             await _client.From<Player>().Update(player);
         }
 
-        //Tanka in ett nytt ord i spelet???
-        /*
         var gameResponse = await _client.From<Game>().Where(g => g.Id == gameId).Get();
-        var game = gameResponse.Model;
-        if (game != null) 
+        var game = gameResponse.Models?.FirstOrDefault();
+        if (game != null)
         {
-            game.TargetWord = "NYTT_SLUMPAT_ORD";
+            game.CurrentRound += 1;
             await _client.From<Game>().Update(game);
         }
-        */
+
     }
     // Väntar på att båda spelarna ska vara redo
     public async Task<bool> IsGameReady(string gameId)
@@ -122,7 +118,7 @@ public class GameService
     public async Task UpdateGameWord(string gameId, string word, string category)
     {
         var response = await _client.From<Game>().Where(g => g.Id == gameId).Get();
-        var game = response.Model;
+        var game = response.Models?.FirstOrDefault();
 
         if (game != null)
         {
@@ -139,7 +135,7 @@ public class GameService
             .Where(x => x.Id == gameId)
             .Get();
 
-        return response.Models.FirstOrDefault();
+        return response.Models?.FirstOrDefault();
     }
 }
 

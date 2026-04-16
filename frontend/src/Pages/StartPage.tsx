@@ -45,10 +45,10 @@ export function StartPage({ onStartGame, onGoToJoin }: StartPageProps) {
         <div className="button-group">
           <button className="btn Start" type="button" onClick={handleHostGame}>Host Game</button>
         </div>
-        <div>
+        <div className="button-group">
           <button className="btn Join" onClick={handleJoinGame}>Join Game</button>
         </div>
-      </div>
-    </div>
+      </div >
+    </div >
   );
 }

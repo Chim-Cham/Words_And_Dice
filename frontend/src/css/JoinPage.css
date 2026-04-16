@@ -29,8 +29,8 @@
     0 0 20px rgba(255, 0, 0, 0.3);
 }
 
-.form-section {
-  margin-top: 120px;
+.form-section-join {
+  margin-top: 70px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -123,6 +123,16 @@
 }
 
 .btn.joining:hover {
+  background-color: rgb(44, 221, 44);
+  transform: translateY(-5px);
+}
+
+.btn.back {
+  background-color: rgb(224, 232, 224);
+  color: rgba(0, 0, 0);
+}
+
+.btn.back:hover {
   background-color: rgb(44, 221, 44);
   transform: translateY(-5px);
 }

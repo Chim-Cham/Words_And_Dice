@@ -18,6 +18,10 @@
     0 0 40px rgba(70, 4, 4, 0.2);
 }
 
+.placment-tag{
+  margin-top: 50px;
+}
+
 .tag-line {
   color: rgb(136, 22, 22);
   font-size: 18px;
@@ -25,8 +29,8 @@
   margin-top: 10px;
 }
 
-.form-section {
-  margin-top: 120px;
+.form-section-inv {
+  margin-top: 40px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -77,9 +81,58 @@
 .copy-btn img {
   width: 20px;
   height: 20px;
-  filter: drop-shadow(0 0 4px rgba(255, 0, 0, 0.6));
+  filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.9));
 }
 
 .button-group {
   transform: scale(1.15);
 }
+
+.waiting-for-player-container{
+  display: flex;
+  flex-direction: row;
+  gap: 25px;
+}
+
+.loader {
+  width: 28px;
+  height: 28px;
+  display: inline-block;
+  position: relative;
+  margin-top: 6px
+}
+.loader::after,
+.loader::before {
+  content: '';
+  width: 28px;
+  height: 28px;
+  border: 2px solid #000000;
+  position: absolute;
+  left: 0;
+  top: 0;
+  box-sizing: border-box;
+  animation: rotation 2s ease-in-out infinite;
+}
+.loader::after {
+  border-color: #0A5410;
+  animation-delay: 1s;
+}
+
+.btn.back {
+  background-color: rgb(224, 232, 224);
+  color: rgba(0, 0, 0);
+}
+
+.btn.back:hover {
+  background-color: rgb(44, 221, 44);
+  transform: translateY(-5px);
+}
+
+@keyframes rotation {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+} 
