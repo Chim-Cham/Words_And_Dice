@@ -76,7 +76,7 @@ function App() {
   }
 
   if (page === "invite") {
-    return <InvitePage gameId={gameId} onContinue={handleContinue} />;
+    return <InvitePage gameId={gameId} onContinue={handleContinue} onBack={() => setPage("start")} />;
   }
 
   if (page === "game") {

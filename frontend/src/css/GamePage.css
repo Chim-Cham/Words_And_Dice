@@ -354,6 +354,24 @@ body {
   box-shadow: 0 0 16px rgba(0, 0, 0, 0.18);
 }
 
+.wrong-answer-text {
+  color: #ff4444;
+  margin: 0 0 12px;
+  font-weight: 600;
+}
+
+.correct-answer-text {
+  color: #4cff72;
+  font-weight: 700;
+  margin: 0 0 12px;
+}
+
+.next-level-bonus-text {
+  color: #aaa;
+  font-size: 14px;
+  margin: 0 0 10px;
+}
+
 .instructions-panel p {
   margin: 0;
   color: white;
@@ -391,4 +409,58 @@ body {
   .points-display-box {
     min-width: 150px;
   }
+}
+
+.loading-container{
+  display: flex;
+  justify-content: center;
+  gap: 25px;
+}
+
+.loader-dice {
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  border-radius: 8px;
+  background-color: #fff;
+  animation: move 4s linear infinite, rotate 2s linear infinite;
+}
+
+.loader-dice::after {
+  content: 'L';
+  color: #000000;
+  font-family: Arial, sans-serif;
+  font-weight: bold;
+  font-size: 24px;
+  animation: changeLetter 12s linear infinite;
+}
+
+@keyframes changeLetter {
+  0%, 14% { content: 'L'; }
+  15%, 29% { content: 'O'; }
+  30%, 44% { content: 'A'; }
+  45%, 59% { content: 'D'; }
+  60%, 74% { content: 'I'; }
+  75%, 89% { content: 'N'; }
+  90%, 100% { content: 'G'; }
+}
+
+@keyframes rotate {
+  0%, 20% { transform: rotate(0deg); }
+  30%, 40% { transform: rotate(90deg); }
+  50%, 60% { transform: rotate(180deg); }
+  70%, 80% { transform: rotate(270deg); }
+  90%, 100% { transform: rotate(360deg); }
+}
+
+@keyframes move {
+  0%, 9% { left: -1px; }
+  10%, 25% { left: 0px; top: -1px; }
+  30%, 45% { left: 2px; top: 0px; }
+  50%, 65% { left: 0px; top: 1px; }
+  70%, 85% { left: -2px; top: 0px; }
+  90%, 100% { left: 0px; }
 }
