@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { StartPage } from "./Pages/StartPage";
 import { InvitePage } from "./Pages/InvitePage";
 import { GamePage } from "./Pages/GamePage";
@@ -9,6 +9,17 @@ function App() {
   const [gameId, setGameId] = useState("");
   const [playerId, setPlayerId] = useState("");
   const [username, setUsername] = useState("");
+
+  useEffect(() => {
+    const path = window.location.pathname;
+    if (path.startsWith("/join/")) {
+      const idFromUrl = path.replace("/join/", "");
+      if (idFromUrl) {
+        setGameId(idFromUrl);
+        setPage("join");
+      }
+    }
+  }, []);
 
   async function handleStartGame(username: string) {
     try {
@@ -49,11 +60,11 @@ function App() {
     setPage("join");
   }
 
-  async function handleJoinSubmit(enteredGameId: string) {
-    if (!enteredGameId.trim()) return alert("Ange ett Game ID");
+  async function handleJoinSubmit(enteredGameId: string, joinUsername: string) {
+    if (!enteredGameId.trim() || !joinUsername.trim()) return alert("Missing information");
 
     try {
-      const response = await fetch(`http://localhost:5164/api/games/${enteredGameId}/players?name=${username}`, {
+      const response = await fetch(`http://localhost:5164/api/games/${enteredGameId}/players?name=${joinUsername}`, {
         method: "POST"
       });
 
@@ -61,8 +72,10 @@ function App() {
 
       const playerData = await response.json();
 
+      setUsername(joinUsername);
       setGameId(enteredGameId);
       setPlayerId(playerData.id || playerData.Id);
+      window.history.pushState({}, "", "/");
       setPage("game");
 
     } catch (error) {
@@ -70,6 +83,7 @@ function App() {
       alert("Kunde inte ansluta. Kontrollera att Game ID är korrekt.");
     }
   }
+
 
   function handleContinue() {
     setPage("game");
@@ -90,7 +104,17 @@ function App() {
   }
 
   if (page === "join") {
-    return <JoinPage onJoinGame={handleJoinSubmit} onBack={() => setPage("start")} />
+    return (
+      <JoinPage
+        initialGameId={gameId}
+        initialUsername={username}
+        onJoinGame={handleJoinSubmit}
+        onBack={() => {
+          window.history.pushState({}, "", "/");
+          setPage("start");
+        }}
+      />
+    );
   }
   console.log("Current Player ID:", playerId);
   return <StartPage onStartGame={handleStartGame} onGoToJoin={handleGoToJoin} />;
