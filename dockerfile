@@ -31,7 +31,7 @@ RUN dotnet publish ./backend -c Release -o /out
 
 
 # --------------------- Runtime Build ---------------------
-FROM FROM mcr.microsoft.com/dotnet/sdk:10.0.103
+FROM mcr.microsoft.com/dotnet/sdk:10.0.103
 
 WORKDIR /WORDS_AND_DICE
 
