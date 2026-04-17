@@ -9,12 +9,10 @@
     },
     {
       "path": "./frontend-tests/tsconfig.json"
-    },
-    {
-      "compilerOptions": {
+    }
+  ],
+   "compilerOptions": {
       "esModuleInterop": true,
       "skipLibCheck": true
-      }
     }
-  ]
 }
