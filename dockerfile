@@ -39,7 +39,7 @@ WORKDIR /WORDS_AND_DICE
 COPY --from=backend-build /out .
 
 # Copy React build into wwwroot
-COPY --from=frontend /app/frontend/build ./wwwroot
+COPY --from=frontend /app/frontend/dist ./wwwroot
 
 # Expose port (Render sets PORT env var)
 ENV ASPNETCORE_URLS=http://+:10000
