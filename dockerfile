@@ -1,5 +1,5 @@
 # --------------------- Frontend Build ---------------------
-FROM node:24.13.1 AS frontend
+FROM node:24 AS frontend
 
 WORKDIR /WORDS_AND_DICE/frontend
 
@@ -15,7 +15,7 @@ RUN npm run build
 
 
 # --------------------- Backend Build ---------------------
-FROM mcr.microsoft.com/dotnet/sdk:10.0.103 AS backend-build
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS backend-build
 
 WORKDIR /WORDS_AND_DICE
 
