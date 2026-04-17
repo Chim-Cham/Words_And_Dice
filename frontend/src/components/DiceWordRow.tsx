@@ -6,10 +6,12 @@ const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZÅÄÖ";
 type Props = {
   word: string;
   diceIndices: number[];
+  hintIndices?: number[];
   rolling: boolean;
+
 };
 
-function DieSlot({ letter, rolling, hasDie }: { letter: string; rolling: boolean; hasDie: boolean }) {
+function DieSlot({ letter, rolling, hasDie, isHint }: { letter: string; rolling: boolean; hasDie: boolean; isHint: boolean }) {
   const [display, setDisplay] = useState("?");
   const [phase, setPhase] = useState<"rolling" | "idle" | "sliding" | "settled">("rolling");
 
@@ -35,7 +37,7 @@ function DieSlot({ letter, rolling, hasDie }: { letter: string; rolling: boolean
       </div>
 
       {hasDie && (
-        <div className={`die-face die-face--${phase}`}>
+        <div className={`die-face die-face--${phase}${isHint ? " die-face--hint" : ""}`}>
           {display}
         </div>
       )}
@@ -43,7 +45,7 @@ function DieSlot({ letter, rolling, hasDie }: { letter: string; rolling: boolean
   );
 }
 
-export function DiceWordRow({ word, diceIndices, rolling }: Props) {
+export function DiceWordRow({ word, diceIndices, hintIndices = [], rolling }: Props) {
   const letters = word.toUpperCase().split("");
 
   return (
@@ -53,7 +55,8 @@ export function DiceWordRow({ word, diceIndices, rolling }: Props) {
           key={i}
           letter={letter}
           rolling={rolling}
-          hasDie={diceIndices.includes(i)}
+          hasDie={diceIndices.includes(i) || hintIndices.includes(i)}
+          isHint={hintIndices.includes(i)}
         />
       ))}
     </div>
