@@ -1,5 +1,5 @@
 # --------------------- Frontend Build ---------------------
-FROM node:24.13.1
+FROM node:24.13.1 AS frontend
 
 WORKDIR /WORDS_AND_DICE/frontend
 
