@@ -19,8 +19,6 @@ export function InvitePage({ gameId, onContinue, onBack }: InvitePageProps) {
     alert("Copied to clipboard!");
   };
 
-const API_URL = import.meta.env.VITE_API_URL;
-
   useEffect(() => {
     if (!gameId) return;
     const interval = setInterval(async () => {

@@ -10,7 +10,6 @@ function App() {
   const [playerId, setPlayerId] = useState("");
   const [username, setUsername] = useState("");
 
-const API_URL = import.meta.env.VITE_API_URL;
 console.log(import.meta.env.VITE_API_URL);
 
   async function handleStartGame(username: string) {
