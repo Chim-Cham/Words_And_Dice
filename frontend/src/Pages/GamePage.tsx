@@ -112,7 +112,7 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
   const [wordSlots, setWordSlots] = useState<string[]>([]);
   const [rolling, setRolling] = useState(true);
   const [diceIndices, setDiceIndices] = useState<number[]>([]);
-
+  const [revealedIndices, setRevealedIndices] = useState<number[]>([]);
   // Det som tar fram ett random ord
   const categories = ["brainrot", "countries", "capitals_of_countries", "sports", "animals", "programming_languages", "games", "pc_games", "mobile_games", "companies"];
   const randomCategory = categories[Math.floor(Math.random() * categories.length)];
@@ -179,6 +179,20 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
     setTimeout(() => setRolling(false), 1400);
   }
 
+  function buyHint() {
+    const alreadyRevealed = new Set([...diceIndices, ...revealedIndices]);
+    const hidden = wordSlots.map((_, i) => i).filter(i => !alreadyRevealed.has(i));
+    if (hidden.length === 0) return;
+    const pick = hidden[Math.floor(Math.random() * hidden.length)];
+    setRevealedIndices(prev => [...prev, pick]);
+    const newScore = playerPoints - wordLength;
+    setPlayerPoints(newScore);
+    fetch(`http://localhost:5164/api/players/${playerId}/submit-round?newScore=${newScore}`, {
+      method: "POST"
+    }).catch(e => console.error("Kunde inte uppdatera poäng efter hint", e));
+  }
+
+
 
   useEffect(() => {
     if (!isYouPlayer1) return;
@@ -244,6 +258,7 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
       const slots = generateWordSlots(currentWord.word);
       setWordSlots(slots);
       setDiceIndices(randomIndices(slots));
+      setRevealedIndices([]);
     }
   }, [currentWord]);
 
@@ -321,6 +336,7 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
               className="secondary-button"
               type="button"
               disabled={!canUseHint}
+              onClick={buyHint}
             >
               Buy Hint
             </button>
@@ -357,6 +373,7 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
             <DiceWordRow
               word={currentWord.word.toUpperCase()}
               diceIndices={diceIndices}
+              hintIndices={revealedIndices}
               rolling={rolling}
             />
 
