@@ -16,6 +16,11 @@ var app = builder.Build();
 
 app.UseCors("AllowAll");
 
+app.UseDefaultFiles();
+app.UseStaticFiles();
+
+app.MapControllers();
+
 //Test Api endpoints
 app.DebugStart();
 
@@ -31,5 +36,8 @@ app.UtilApiStart();
 // Word generator endpoint
 app.WordGenerator();
 
+app.MapFallbackToFile("index.html");
 
 app.Run();
+
+
