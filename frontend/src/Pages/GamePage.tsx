@@ -38,6 +38,7 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
   const [waitingForOpponent, setWaitingForOpponent] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(false);
 
+const API_URL = import.meta.env.VITE_API_URL;
 
   // Kontrollerar spelarens gissning mot det rätta svaret.
   // Ger +5 poäng vid rätt svar annars markeras fel.
@@ -50,7 +51,7 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
       setIsWrong(false);
       setWaitingForOpponent(true);
       try {
-        await fetch(`http://localhost:5164/api/players/${playerId}/submit-round?newScore=${newScore}`, {
+        await fetch(`${API_URL}/api/players/${playerId}/submit-round?newScore=${newScore}`, {
           method: "POST"
           // headers: { "Content-Type": "application/json" },
           // body: JSON.stringify(newScore)
@@ -64,7 +65,7 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
   useEffect(() => {
     const fetchPlayers = async () => {
       try {
-        const response = await fetch(`http://localhost:5164/api/games/${gameId}/players`);
+        const response = await fetch(`${API_URL}/api/games/${gameId}/players`);
         if (response.ok) {
           const data = await response.json();
           setPlayers(data);
@@ -90,7 +91,7 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
   useEffect(() => {
     if (timeLeft === 0 && !waitingForOpponent) {
       setWaitingForOpponent(true);
-      fetch(`http://localhost:5164/api/players/${playerId}/submit-round?newScore=${playerPoints}`, {
+      fetch(`${API_URL}/api/players/${playerId}/submit-round?newScore=${playerPoints}`, {
         method: "POST"
         // headers: { "Content-Type": "application/json" },
         // body: JSON.stringify(playerPoints)
@@ -123,7 +124,7 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
   useEffect(() => {
     const syncGame = async () => {
       try {
-        const res = await fetch(`http://localhost:5164/api/games/${gameId}`);
+        const res = await fetch(`${API_URL}/api/games/${gameId}`);
         if (res.ok) {
           const data = await res.json();
           //setGameInfo(data);
@@ -184,7 +185,7 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
     if (!isYouPlayer1) return;
     async function loadWord() {
       try {
-        const res = await fetch(`http://localhost:5164/api/word/${randomCategory}/${randomLength}`);
+        const res = await fetch(`${API_URL}/api/word/${randomCategory}/${randomLength}`);
         const data = await res.json();
 
         const wordObj = data[0];
@@ -196,7 +197,7 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
         };
         setCurrentWord(newWord);
 
-        await fetch(`http://localhost:5164/api/games/${gameId}/word`, {
+        await fetch(`${API_URL}/api/games/${gameId}/word`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(newWord)
@@ -230,7 +231,7 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
       }
 
       setIsTransitioning(true);
-      fetch(`http://localhost:5164/api/games/${gameId}/next-round`, { method: "POST" })
+      fetch(`${API_URL}/api/games/${gameId}/next-round`, { method: "POST" })
         .then(() => setTimeout(() => setIsTransitioning(false), 2000)) // Pausa låset i 2s
         .catch(err => {
           console.error(err);
