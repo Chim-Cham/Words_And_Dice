@@ -51,7 +51,7 @@ const API_URL = import.meta.env.VITE_API_URL;
       setIsWrong(false);
       setWaitingForOpponent(true);
       try {
-        await fetch(`${API_URL}/api/players/${playerId}/submit-round?newScore=${newScore}`, {
+        await fetch(`/api/players/${playerId}/submit-round?newScore=${newScore}`, {
           method: "POST"
           // headers: { "Content-Type": "application/json" },
           // body: JSON.stringify(newScore)
@@ -65,7 +65,7 @@ const API_URL = import.meta.env.VITE_API_URL;
   useEffect(() => {
     const fetchPlayers = async () => {
       try {
-        const response = await fetch(`${API_URL}/api/games/${gameId}/players`);
+        const response = await fetch(`/api/games/${gameId}/players`);
         if (response.ok) {
           const data = await response.json();
           setPlayers(data);
@@ -91,7 +91,7 @@ const API_URL = import.meta.env.VITE_API_URL;
   useEffect(() => {
     if (timeLeft === 0 && !waitingForOpponent) {
       setWaitingForOpponent(true);
-      fetch(`${API_URL}/api/players/${playerId}/submit-round?newScore=${playerPoints}`, {
+      fetch(`/api/players/${playerId}/submit-round?newScore=${playerPoints}`, {
         method: "POST"
         // headers: { "Content-Type": "application/json" },
         // body: JSON.stringify(playerPoints)
@@ -124,7 +124,7 @@ const API_URL = import.meta.env.VITE_API_URL;
   useEffect(() => {
     const syncGame = async () => {
       try {
-        const res = await fetch(`${API_URL}/api/games/${gameId}`);
+        const res = await fetch(`/api/games/${gameId}`);
         if (res.ok) {
           const data = await res.json();
           //setGameInfo(data);
@@ -185,7 +185,7 @@ const API_URL = import.meta.env.VITE_API_URL;
     if (!isYouPlayer1) return;
     async function loadWord() {
       try {
-        const res = await fetch(`${API_URL}/api/word/${randomCategory}/${randomLength}`);
+        const res = await fetch(`/api/word/${randomCategory}/${randomLength}`);
         const data = await res.json();
 
         const wordObj = data[0];
@@ -197,7 +197,7 @@ const API_URL = import.meta.env.VITE_API_URL;
         };
         setCurrentWord(newWord);
 
-        await fetch(`${API_URL}/api/games/${gameId}/word`, {
+        await fetch(`/api/games/${gameId}/word`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(newWord)
@@ -231,7 +231,7 @@ const API_URL = import.meta.env.VITE_API_URL;
       }
 
       setIsTransitioning(true);
-      fetch(`${API_URL}/api/games/${gameId}/next-round`, { method: "POST" })
+      fetch(`/api/games/${gameId}/next-round`, { method: "POST" })
         .then(() => setTimeout(() => setIsTransitioning(false), 2000)) // Pausa låset i 2s
         .catch(err => {
           console.error(err);

@@ -25,7 +25,7 @@ const API_URL = import.meta.env.VITE_API_URL;
     if (!gameId) return;
     const interval = setInterval(async () => {
       try {
-        const response = await fetch(`${API_URL}/api/games/${gameId}/players`);
+        const response = await fetch(`/api/games/${gameId}/players`);
         if (response.ok) {
           const players = await response.json();
           if (players.length >= 2) {
