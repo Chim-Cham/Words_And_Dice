@@ -39,5 +39,18 @@ public static class RoundApi
             await gameService.UpdateGameWord(gameId, wordDto.word, wordDto.category);
             return Results.Ok();
         });
+
+        app.MapPost("/api/games/{gameId}/guess", async (string gameId, GuessRequest req, GameService gameService) =>
+        {
+            try
+            {
+                var result = await gameService.SubmitGuess(gameId, req.PlayerId, req.Guess);
+                return Results.Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return Results.BadRequest(new { error = ex.Message });
+            }
+        });
     }
 }
