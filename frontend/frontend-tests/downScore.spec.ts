@@ -46,6 +46,18 @@ test.describe('DownScore Flow (wrong answer gives -5)', () => {
       });
     });
 
+    await page.route('**/api/games/*/guess', async route => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          correct: false,
+          scoreChange: -5,
+          newScore: -5
+        })
+      });
+    });
+
     await page.goto('http://localhost:5173');
 
     await page.getByPlaceholder('Username').fill('TestSpelaren');
@@ -69,10 +81,20 @@ test.describe('DownScore Flow (wrong answer gives -5)', () => {
         contentType: 'application/json',
         body: JSON.stringify([
           {
-            id: 'player123', playerName: 'TestSpelaren', score: 0
+            id: 'player123',
+            gameId: 'game-456',
+            playerName: 'TestSpelaren',
+            score: 0,
+            lastGuess: null,
+            isRoundReady: false
           },
           {
-            id: 'player999', playerName: 'Motståndaren', score: 0
+            id: 'player999',
+            gameId: 'game-456',
+            playerName: 'Motståndaren',
+            score: 0,
+            lastGuess: null,
+            isRoundReady: false
           }
         ])
       });
