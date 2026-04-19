@@ -1,9 +1,6 @@
 import { test, expect, type Route } from '@playwright/test';
 
 test.describe('Multiplayer word generation', () => {
-  test.beforeEach(async ({ page }) => {
-    await page.goto('http://localhost:5173');
-  });
 
   test('joining a game shows mocked word and category', async ({ page }) => {
     await page.route('**/api/games/*/players?name=*', async (route: Route) => {
@@ -26,8 +23,18 @@ test.describe('Multiplayer word generation', () => {
         status: 200,
         contentType: 'application/json',
         body: JSON.stringify([
-          { id: 'host-uuid-999', playerName: 'Hosten', score: 0 },
-          { id: 'fejk-player-uuid-123', playerName: 'TestSpelaren', score: 0 }
+          { id: 'host-uuid-999', playerName: 'Hosten', score: 0, isRoundReady: false },
+          { id: 'fejk-player-uuid-123', playerName: 'TestSpelaren', score: 0, isRoundReady: false }
+        ])
+      });
+    });
+
+    await page.route('**/api/word/*/*', async (route: Route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify([
+          { word: 'tiger', category: 'animals', length: 5 }
         ])
       });
     });
@@ -46,9 +53,11 @@ test.describe('Multiplayer word generation', () => {
         })
       });
     });
+    // New
+    await page.goto('http://localhost:5173');
 
     await page.getByPlaceholder('Username').fill('TestSpelaren');
-    await page.getByRole('button', { name: 'Join game' }).click();
+    await page.getByRole('button', { name: 'Join Game' }).click();
 
     await page.getByPlaceholder('Enter Game ID').fill('mitt-test-id');
 

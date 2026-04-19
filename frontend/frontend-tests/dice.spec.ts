@@ -38,3 +38,15 @@ test('dice-word-row renderas', async ({ page }) => {
   const row = page.locator('.dice-word-row');
   await expect(row).toBeVisible();
 });
+test('hint cost matches word length', async ({ page }) => {
+  // word is 'tiger' = 5 letters
+  await expect(page.getByText('Hint cost: 5 points')).toBeVisible();
+});
+
+test('Buy Hint button is disabled when player has 0 points', async ({ page }) => {
+  await expect(page.getByRole('button', { name: 'Buy Hint' })).toBeDisabled();
+});
+
+test('warning message shown when player cannot afford hint', async ({ page }) => {
+  await expect(page.getByText(/don't have any points yet/i)).toBeVisible();
+});

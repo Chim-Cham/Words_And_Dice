@@ -21,13 +21,13 @@ test.describe('GamePage Timer Flow', () => {
         status: 200,
         contentType: 'application/json',
         body: JSON.stringify([
-          { id: 'player-123', playerName: 'TestSpelaren', score: 0 },
-          { id: 'player-999', playerName: 'Motståndaren', score: 0 }
+          { id: 'player-123', playerName: 'TestSpelaren', score: 0, isRoundReady: false },
+          { id: 'player-999', playerName: 'Motståndaren', score: 0, isRoundReady: false }
         ])
       });
     });
 
-    // 4. Mock the Word API (Crucial to bypass "Loading word..." screen)
+    // Mock the Word API — Player 1 uses this
     await page.route('**/api/word/*/*', async route => {
       await route.fulfill({
         status: 200,
@@ -38,6 +38,20 @@ test.describe('GamePage Timer Flow', () => {
       });
     });
 
+    // Mock game sync — Player 2 uses this to get the word
+    await page.route('**/api/games/game-456', async route => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          id: 'game-456',
+          status: 'waiting',
+          targetWord: 'PLAYWRIGHT',
+          category: 'programming_languages',
+          currentRound: 1
+        })
+      });
+    });
     // 5. Navigation Flow
     await page.goto('http://localhost:5173');
 
@@ -59,6 +73,8 @@ test.describe('GamePage Timer Flow', () => {
   test('Start at 45 sec at the start of the game', async ({ page }) => {
     await expect(page.getByText('Time: 45s')).toBeVisible();
     await expect(page.getByPlaceholder('Type the word here...')).toBeEnabled();
+    // text in feild
+    await page.getByPlaceholder('Type the word here...').fill('TEST');
     await expect(page.getByRole('button', { name: 'Confirm Word' })).toBeEnabled();
   });
 
@@ -78,7 +94,7 @@ test.describe('GamePage Timer Flow', () => {
     await page.clock.runFor(45000);
 
     await expect(page.getByText('Time: 0s')).toBeVisible();
-    await expect(page.getByText('Time is up!')).toBeVisible();
+    await expect(page.locator('.status-box', { hasText: 'Time is up!' })).toBeVisible();
 
     // Verify input and button are disabled via the isInputDisabled logic
     await expect(page.getByPlaceholder('Type the word here...')).toBeDisabled();
