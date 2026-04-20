@@ -10,6 +10,10 @@ RUN npm install
 # Copy frontend source
 COPY frontend/ ./
 
+# Makes sure the VITE_API_URL get's assigned a value and is not left undefined hwne deployed
+ARG VITE_API_URL
+ENV VITE_API_URL=$VITE_API_URL
+
 # Build React app
 RUN npm run build
 
