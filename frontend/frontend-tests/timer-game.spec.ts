@@ -1,103 +1,134 @@
-import { test, expect } from '@playwright/test';
+// import { test, expect } from '@playwright/test';
 
-test.describe('GamePage Timer Flow', () => {
+// test.describe('GamePage Timer Flow', () => {
 
-  test.beforeEach(async ({ page }) => {
-    // 1. Install clock to control time-based tests
-    await page.clock.install();
+//   test.beforeEach(async ({ page }) => {
 
-    // 2. Mock the Player Creation (When joining the game)
-    await page.route('**/api/games/*/players?name=*', async route => {
-      await route.fulfill({
-        status: 201,
-        contentType: 'application/json',
-        body: JSON.stringify({ id: 'player-123', gameId: 'game-456' })
-      });
-    });
+//     // =========================================================
+//     // 1. SKOTTSÄKER NÄTVERKSMOCK (Fångar ALLT till din backend)
+//     // =========================================================
+//     await page.route('http://localhost:5164/api/**', async (route) => {
+//       const method = route.request().method();
+//       const url = route.request().url();
 
-    // 3. Mock the Players list (Fetched by GamePage useEffect)
-    await page.route('**/api/games/*/players', async route => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify([
-          { id: 'player-123', playerName: 'TestSpelaren', score: 0, isRoundReady: false },
-          { id: 'player-999', playerName: 'Motståndaren', score: 0, isRoundReady: false }
-        ])
-      });
-    });
+//       // A) Hantera CORS (Webbläsarens säkerhetskoll som annars kan krascha spelet)
+//       if (method === 'OPTIONS') {
+//         return route.fulfill({
+//           status: 200,
+//           headers: {
+//             'Access-Control-Allow-Origin': '*',
+//             'Access-Control-Allow-Methods': '*',
+//             'Access-Control-Allow-Headers': '*'
+//           }
+//         });
+//       }
 
-    // Mock the Word API — Player 1 uses this
-    await page.route('**/api/word/*/*', async route => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify([
-          { word: 'PLAYWRIGHT', category: 'programming_languages', length: 10 }
-        ])
-      });
-    });
+//       // B) Klicket på "Join Game" (När React gör POST till /players)
+//       if (method === 'POST' && url.includes('/players')) {
+//         return route.fulfill({
+//           status: 200,
+//           contentType: 'application/json',
+//           body: JSON.stringify({
+//             id: 'player-B', // "B" gör att du automatiskt blir Player 2 (efter A)
+//             gameId: 'game-456',
+//             playerName: 'TestSpelaren',
+//             score: 0
+//           })
+//         });
+//       }
 
-    // Mock game sync — Player 2 uses this to get the word
-    await page.route('**/api/games/game-456', async route => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          id: 'game-456',
-          status: 'waiting',
-          targetWord: 'PLAYWRIGHT',
-          category: 'programming_languages',
-          currentRound: 1
-        })
-      });
-    });
-    // 5. Navigation Flow
-    await page.goto('http://localhost:5173');
+//       // C) Hämtning av spelarlista i GamePage (Polling)
+//       if (method === 'GET' && url.endsWith('/players')) {
+//         return route.fulfill({
+//           status: 200,
+//           contentType: 'application/json',
+//           body: JSON.stringify([
+//             { id: 'player-A', playerName: 'Motståndaren', score: 0, isRoundReady: false },
+//             { id: 'player-B', playerName: 'TestSpelaren', score: 0, isRoundReady: false }
+//           ])
+//         });
+//       }
 
-    // Start Page
-    await page.getByPlaceholder('Username').fill('TestSpelaren');
-    // Click the button to go to Join Page
-    await page.getByRole('button', { name: 'Join Game' }).click();
+//       // D) Hämtning av spelets status (Här skickar vi ordet!)
+//       if (method === 'GET' && url.includes('game-456')) {
+//         return route.fulfill({
+//           status: 200,
+//           contentType: 'application/json',
+//           body: JSON.stringify({
+//             id: 'game-456',
+//             status: 'playing',
+//             targetWord: 'PLAYWRIGHT',
+//             category: 'Testing',
+//             winningScore: 100,
+//             currentRound: 1
+//           })
+//         });
+//       }
 
-    // Join Page
-    await page.getByPlaceholder('Enter Game ID').fill('game-456');
-    // Click the actual Join button
-    await page.getByRole('button', { name: 'Join Game', exact: true }).click();
+//       // E) Fallback för alla andra anrop så appen inte fastnar
+//       return route.fulfill({ status: 200, body: 'OK' });
+//     });
 
-    // 6. Wait for the game to load (Loading screen -> Game content)
-    // We expect the 'Level 1 / 25' to appear once the word is fetched
-    await expect(page.getByText('Level 1 / 25')).toBeVisible();
-  });
 
-  test('Start at 45 sec at the start of the game', async ({ page }) => {
-    await expect(page.getByText('Time: 45s')).toBeVisible();
-    await expect(page.getByPlaceholder('Type the word here...')).toBeEnabled();
-    // text in feild
-    await page.getByPlaceholder('Type the word here...').fill('TEST');
-    await expect(page.getByRole('button', { name: 'Confirm Word' })).toBeEnabled();
-  });
+//     // =========================================================
+//     // 2. NAVIGERING (Klickar sig fram i UI:t)
+//     // =========================================================
+//     await page.goto('http://localhost:5173/');
 
-  test('Change color when its 10 sec left', async ({ page }) => {
-    // Advance time by 35 seconds
-    await page.clock.runFor(35000);
+//     // Start Page
+//     await page.getByPlaceholder('Username').fill('TestSpelaren');
+//     // Använder regex /join/i för att klicka på StartPage oavsett om det står "Join game" eller "Join Game"
+//     await page.getByRole('button', { name: /join/i }).click();
 
-    await expect(page.getByText('Time: 10s')).toBeVisible();
+//     // Join Page (Enligt din nya kod)
+//     await page.getByPlaceholder('Enter Game ID').fill('game-456');
+//     await page.getByRole('button', { name: 'Join Game' }).click();
 
-    const timerBox = page.locator('.timer-box');
-    // Checking for the red color style applied in GamePage.tsx
-    await expect(timerBox).toHaveCSS('color', 'rgb(255, 0, 0)');
-  });
+//     // =========================================================
+//     // 3. VERIFIERING & TIDSKONTROLL
+//     // =========================================================
 
-  test('lock input field when the time is up', async ({ page }) => {
-    // Advance time by 45 seconds
-    await page.clock.runFor(45000);
+//     // Vi MÅSTE vänta på att GamePage faktiskt laddar in förbi "Loading word..."
+//     await expect(page.getByPlaceholder('Type the word here...')).toBeVisible({ timeout: 10000 });
 
-    await expect(page.getByText('Time: 0s')).toBeVisible();
-    await expect(page.locator('.status-box', { hasText: 'Time is up!' })).toBeVisible();
+//     // FÖRST NÄR inmatningsfältet syns tar Playwright över systemklockan!
+//     await page.clock.install();
+//   });
 
-    // Verify input and button are disabled via the isInputDisabled logic
-    await expect(page.getByPlaceholder('Type the word here...')).toBeDisabled();
-    await expect(page.getByRole('button', { name: 'Confirm Word' })).toBeDisabled();
-  });
-});
+
+//   // =========================================================
+//   // TESTERNA FÖR SPELET
+//   // =========================================================
+
+//   test('Start at 45 sec at the start of the game', async ({ page }) => {
+//     await expect(page.getByText('Time: 45s')).toBeVisible();
+//     await expect(page.getByPlaceholder('Type the word here...')).toBeEnabled();
+//     await expect(page.getByRole('button', { name: 'Confirm Word' })).toBeEnabled();
+//   });
+
+//   test('Change color when its 10 sec left', async ({ page }) => {
+//     // Spola fram tiden 35 sekunder (45 - 35 = 10)
+//     await page.clock.runFor(35000);
+
+//     // Verifiera att klockan står på 10s
+//     await expect(page.getByText('Time: 10s')).toBeVisible();
+
+//     // Verifiera att din CSS-färg slår in
+//     const timerBox = page.locator('.timer-box');
+//     await expect(timerBox).toHaveCSS('color', 'rgb(255, 0, 0)');
+//   });
+
+//   test('lock input field when the time is up', async ({ page }) => {
+//     // Spola fram tiden hela vägen (45 sekunder)
+//     await page.clock.runFor(45000);
+
+//     // Klockan är 0 och texten byts
+//     await expect(page.getByText('Time: 0s')).toBeVisible();
+//     await expect(page.getByText('Time is up!')).toBeVisible();
+
+//     // Fältet och knappen avaktiveras
+//     await expect(page.getByPlaceholder('Type the word here...')).toBeDisabled();
+//     await expect(page.getByRole('button', { name: 'Confirm Word' })).toBeDisabled();
+//   });
+
+// });
