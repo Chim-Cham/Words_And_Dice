@@ -1,8 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { StartPage } from "./Pages/StartPage";
 import { InvitePage } from "./Pages/InvitePage";
 import { GamePage } from "./Pages/GamePage";
 import { JoinPage } from "./Pages/JoinPage";
+
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5164";
 
 function App() {
   const [page, setPage] = useState<"start" | "invite" | "game" | "join">("start");
@@ -10,9 +12,24 @@ function App() {
   const [playerId, setPlayerId] = useState("");
   const [username, setUsername] = useState("");
 
+  console.log(import.meta.env.VITE_API_URL, API_URL);
+
+  useEffect(() => {
+    const path = window.location.pathname;
+    if (path.startsWith("/join/")) {
+      const idFromUrl = path.replace("/join/", "");
+      if (idFromUrl) {
+        setGameId(idFromUrl);
+        setPage("join");
+      }
+    }
+  }, []);
+
+
+
   async function handleStartGame(username: string) {
     try {
-      const response = await fetch(`http://localhost:5164/api/games?name=${username}`, {
+      const response = await fetch(`${API_URL}/api/games?name=${username}`, {
         method: "POST"
       });
 
@@ -24,7 +41,7 @@ function App() {
       if (idFromServer) {
         setGameId(idFromServer);
         try {
-          const playerRes = await fetch(`http://localhost:5164/api/games/${idFromServer}/players`);
+          const playerRes = await fetch(`${API_URL}/api/games/${idFromServer}/players`);
           if (playerRes.ok) {
             const players = await playerRes.json();
             if (players.length > 0) {
@@ -49,11 +66,11 @@ function App() {
     setPage("join");
   }
 
-  async function handleJoinSubmit(enteredGameId: string) {
-    if (!enteredGameId.trim()) return alert("Ange ett Game ID");
+  async function handleJoinSubmit(enteredGameId: string, joinUsername: string) {
+    if (!enteredGameId.trim() || !joinUsername.trim()) return alert("Missing information");
 
     try {
-      const response = await fetch(`http://localhost:5164/api/games/${enteredGameId}/players?name=${username}`, {
+      const response = await fetch(`${API_URL}/api/games/${enteredGameId}/players?name=${username}`, {
         method: "POST"
       });
 
@@ -61,8 +78,10 @@ function App() {
 
       const playerData = await response.json();
 
+      setUsername(joinUsername);
       setGameId(enteredGameId);
       setPlayerId(playerData.id || playerData.Id);
+      window.history.pushState({}, "", "/");
       setPage("game");
 
     } catch (error) {
@@ -70,6 +89,7 @@ function App() {
       alert("Kunde inte ansluta. Kontrollera att Game ID är korrekt.");
     }
   }
+
 
   function handleContinue() {
     setPage("game");
@@ -90,7 +110,17 @@ function App() {
   }
 
   if (page === "join") {
-    return <JoinPage onJoinGame={handleJoinSubmit} onBack={() => setPage("start")} />
+    return (
+      <JoinPage
+        initialGameId={gameId}
+        initialUsername={username}
+        onJoinGame={handleJoinSubmit}
+        onBack={() => {
+          window.history.pushState({}, "", "/");
+          setPage("start");
+        }}
+      />
+    );
   }
   console.log("Current Player ID:", playerId);
   return <StartPage onStartGame={handleStartGame} onGoToJoin={handleGoToJoin} />;
