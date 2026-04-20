@@ -33,6 +33,7 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
   const [timeLeft, setTimeLeft] = useState(45); //change here if we need to have a longer display time
   //const [gameInfo, setGameInfo] = useState<any>(null);
 
+  // State för att hålla koll på poäng och gissningar
   const [level, setLevel] = useState(1);
   const [levelComplete, setLevelComplete] = useState(false);
   const [playerPoints, setPlayerPoints] = useState(0);
@@ -53,6 +54,7 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
       setLevelComplete(true);
       setIsWrong(false);
       setWaitingForOpponent(true);
+
       try {
         await fetch(`${API_URL}/api/players/${playerId}/submit-round?newScore=${newScore}`, {
           method: "POST"
@@ -61,7 +63,17 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
         });
       } catch (e) { console.error("Kunde inte skicka poäng", e); }
     } else {
+      const newScore = Math.max(0, playerPoints - 5);
+      setPlayerPoints(newScore);
       setIsWrong(true);
+
+      try {
+        await fetch(`http://localhost:5164/api/players/${playerId}/submit-round?newScore=${newScore}`,
+          { method: "POST" }
+        );
+      } catch (e) {
+        console.error("Kunde inte skicka poäng", e);
+      }
     }
   }
 
@@ -111,7 +123,6 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
   const player1 = sortedPlayers[0];
   const player2 = sortedPlayers[1];
   const hasLoadedPlayers = players.length > 0;
-
   const isYouPlayer1 = player1?.id === playerId;
   const isYouPlayer2 = player2?.id === playerId;
 
@@ -285,8 +296,12 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
         <div className="loading-container">
           <span className="loader-dice"></span>
           <p>Loading word...</p>
-          {!hasLoadedPlayers && <p style={{ fontSize: '12px' }}>Syncing players...</p>}
-          {hasLoadedPlayers && !currentWord && <p style={{ fontSize: '12px' }}>Waiting for Host to pick a word...</p>}
+          {!hasLoadedPlayers && (
+            <p className="loading-subtext">Syncing players...</p>
+          )}
+          {hasLoadedPlayers && !currentWord && (
+            <p className="loading-subtext">Waiting for Host to pick a word...</p>
+          )}
         </div>
       </div>
     );
@@ -332,8 +347,8 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
 
       <main className="game-layout">
         <aside className="game-side">
-          <div className={`info-card ${isYouPlayer1 ? "local-player-highlight" : ""}`}>
-            <h2>Player 1 {isYouPlayer1 ? "(You)" : ""}</h2>
+          <div className="info-card">
+            <h2>Player 1</h2>
             <div className="player-circle"></div>
             <p className="player-name">{player1?.playerName || "Loading..."}</p>
             <p className="player-score">Points: {isYouPlayer1 ? playerPoints : player1?.score || 0}</p>
@@ -359,8 +374,9 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
             )}
           </div>
           {/* THIS IS TEMPORARY FOR TESTING REMOVE BEFORE PUSH TO MAIN*/}
-          <button className="back-button" type="button" onClick={reroll}
-            style={{ left: "auto", right: 20 }}>
+          <button className="back-button"
+            type="button" onClick={reroll}
+          >
             Reroll
           </button>
           <button className="back-button" type="button" onClick={() => {
@@ -377,7 +393,7 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
           <div className="top-row">
             <div className="category-box">Category: {category}</div>
 
-            <div className="timer-box" style={{ color: timeLeft <= 10 ? 'red' : 'inherit', fontWeight: 'bold', fontSize: '1.2rem' }}>
+            <div className={`timer-box ${timeLeft <= 10 ? "timer-warning" : ""}`}>
               Time: {timeLeft}s
             </div>
 
@@ -451,7 +467,7 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
             </button>
 
             {waitingForOpponent && (
-              <div className="level-complete-panel" style={{ marginTop: "15px" }}>
+              <div className="level-complete-panel">
                 {!isGameOver ? (
                   <>
                     {levelComplete ? (
@@ -463,11 +479,11 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
                   </>
                 ) : (
 
-                  <div className="game-over-content" style={{ textAlign: "center" }}>
-                    <h2 style={{ color: "#ffd700", marginBottom: "10px", fontSize: "2rem" }}>
+                  <div className="game-over-content">
+                    <h2 className="game-over-title">
                       Game Over!
                     </h2>
-                    <h3 style={{ fontSize: "1.5rem", marginBottom: "20px", color: "white" }}>
+                    <h3 className="game-over-subtitle">
                       {winnerText}
                     </h3>
                     <button className="primary-button" onClick={onBack}>
@@ -492,8 +508,8 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
         </section>
 
         <aside className="game-side">
-          <div className={`info-card ${isYouPlayer2 ? "local-player-highlight" : ""}`}>
-            <h2>Player 2 {isYouPlayer2 ? "(You)" : ""}</h2>
+          <div className="info-card">
+            <h2>Player 2</h2>
             <div className="player-circle opponent-circle"></div>
             <p className="player-name">{player2?.playerName || "Waiting..."}</p>
             <p className="player-score">Points: {isYouPlayer2 ? playerPoints : player2?.score || 0}</p>
