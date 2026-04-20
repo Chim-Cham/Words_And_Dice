@@ -11,7 +11,7 @@ type JoinPageProps = {
 export function JoinPage({ initialGameId, initialUsername, onJoinGame, onBack }: JoinPageProps) {
 
   const [gameId, setGameId] = useState(initialGameId || "");
-  const [username, setUsername] = useState("");
+  const [username, setUsername] = useState(initialUsername || "");
 
   const needsUsername = !initialUsername;
   const needsGameId = !initialGameId;
