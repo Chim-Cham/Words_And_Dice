@@ -10,9 +10,11 @@ function App() {
   const [playerId, setPlayerId] = useState("");
   const [username, setUsername] = useState("");
 
+console.log(import.meta.env.VITE_API_URL);
+
   async function handleStartGame(username: string) {
     try {
-      const response = await fetch(`http://localhost:5164/api/games?name=${username}`, {
+      const response = await fetch(`/api/games?name=${username}`, {
         method: "POST"
       });
 
@@ -24,7 +26,7 @@ function App() {
       if (idFromServer) {
         setGameId(idFromServer);
         try {
-          const playerRes = await fetch(`http://localhost:5164/api/games/${idFromServer}/players`);
+          const playerRes = await fetch(`/api/games/${idFromServer}/players`);
           if (playerRes.ok) {
             const players = await playerRes.json();
             if (players.length > 0) {
@@ -53,7 +55,7 @@ function App() {
     if (!enteredGameId.trim()) return alert("Ange ett Game ID");
 
     try {
-      const response = await fetch(`http://localhost:5164/api/games/${enteredGameId}/players?name=${username}`, {
+      const response = await fetch(`/api/games/${enteredGameId}/players?name=${username}`, {
         method: "POST"
       });
 
