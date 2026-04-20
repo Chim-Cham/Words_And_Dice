@@ -1,14 +1,31 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('GamePage Input Logic (Enter-knapp/button)', () => {
-
   test.beforeEach(async ({ page }) => {
-    // Använder Tiger som "Mock" ord
-    await page.route('**/api/word/*/*', async route => {
+    // Mock för att skapa spel
+    await page.route('**/api/games?name=*', async route => {
+      await route.fulfill({
+        status: 201,
+        contentType: 'application/json',
+        body: JSON.stringify({ id: 'test-game-id', status: 'waiting', targetWord: '', winningScore: 100 })
+      });
+    });
+
+    // Mock för spelets status och målord
+    await page.route('**/api/games/test-game-id', async route => {
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
-        body: JSON.stringify([{ word: "TIGER", category: "animals", length: 5 }])
+        body: JSON.stringify({ id: 'test-game-id', status: 'waiting', targetWord: 'TIGER', category: 'animals', currentRound: 1 })
+      });
+    });
+
+    // Mock för att spara ordet i databasen
+    await page.route('**/api/games/*/word', async route => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ word: 'TIGER', category: 'animals', length: 5 })
       });
     });
 
@@ -18,8 +35,8 @@ test.describe('GamePage Input Logic (Enter-knapp/button)', () => {
         status: 200,
         contentType: 'application/json',
         body: JSON.stringify([
-          { id: 'p1', playerName: 'Host', score: 0 },
-          { id: 'p2', playerName: 'TestSpelaren', score: 0 }
+          { id: 'player-1', playerName: 'Host', score: 0, isRoundReady: true },
+          { id: 'player-2', playerName: 'TestSpelaren', score: 0, isRoundReady: true }
         ])
       });
     });
@@ -29,15 +46,23 @@ test.describe('GamePage Input Logic (Enter-knapp/button)', () => {
       await route.fulfill({ status: 200 });
     });
 
+    // Använder Tiger som "Mock" ord - registreras sist för högst prioritet
+    await page.route(/\/api\/word\//, async route => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify([{ word: "TIGER", category: "animals", length: 5 }])
+      });
+    });
+
     // Gå till spelet
     await page.goto('http://localhost:5173');
     await page.getByPlaceholder('Username').fill('TestSpelaren');
     await page.getByRole('button', { name: 'Host Game' }).click();
 
     // Väntar på att spelet ska ladda
-    await expect(page.getByText('Category: animals')).toBeVisible();
+    await expect(page.getByText('Category: animals')).toBeVisible({ timeout: 10000 });
   });
-
   test('pressing Enter with the correct word submits successfully', async ({ page }) => {
     const input = page.getByPlaceholder('Type the word here...');
 

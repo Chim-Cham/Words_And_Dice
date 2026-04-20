@@ -28,6 +28,19 @@
   transition: border-color 0.3s, color 0.3s, background 0.3s;
 }
 
+.die-face--hint,
+.die-face--hint.die-face--idle,
+.die-face--hint.die-face--sliding,
+.die-face--hint.die-face--settled {
+  background: linear-gradient(135deg, #ffd700, #f0a500) !important;
+  color: #000 !important;
+  box-shadow: 0 4px 14px rgba(255, 215, 0, 0.5), 0 2px 6px rgba(0, 0, 0, 0.5) !important;
+  perspective: 400px;
+  backface-visibility: visible;
+  -webkit-backface-visibility: visible;
+  animation: flip-scale-2-hor-top 0.5s ease-out forwards !important;
+}
+
 .word-slot--revealed {
   border-color: #e74c3c;
   background: rgba(231, 76, 60, 0.1);
@@ -111,5 +124,22 @@
 
   to {
     transform: scale(1);
+  }
+}
+
+@keyframes flip-scale-2-hor-top {
+  0% {
+    transform: translateX(-50%) translateY(56px) rotateX(90deg) scale(0.8);
+    opacity: 0;
+  }
+
+  60% {
+    transform: translateX(-50%) translateY(56px) rotateX(-15deg) scale(1.2);
+    opacity: 1;
+  }
+
+  100% {
+    transform: translateX(-50%) translateY(56px) rotateX(0deg) scale(1);
+    opacity: 1;
   }
 }

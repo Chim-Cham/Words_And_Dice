@@ -12,7 +12,7 @@ test.describe('Join Game Flow', () => {
       await dialog.accept();
     });
 
-    await page.getByRole('button', { name: 'Join game' }).click();
+    await page.getByRole('button', { name: 'Join Game' }).click();
   });
 
   test('able to nav to join game', async ({ page }) => {

@@ -1,6 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import "../css/GamePage.css";
-import { useEffect } from "react";
 import { DiceWordRow } from "../components/DiceWordRow";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5164";
@@ -38,6 +37,7 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
   const [level, setLevel] = useState(1);
   const [levelComplete, setLevelComplete] = useState(false);
   const [playerPoints, setPlayerPoints] = useState(0);
+  const playerPointsRef = useRef(0);
   const [inputValue, setInputValue] = useState("");
   const [isWrong, setIsWrong] = useState(false);
   const [waitingForOpponent, setWaitingForOpponent] = useState(false);
@@ -50,6 +50,7 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
     if (currentWord && guess === currentWord.word.toUpperCase()) {
       const newScore = playerPoints + 5;
       setPlayerPoints(newScore);
+      playerPointsRef.current = newScore;
       setLevelComplete(true);
       setIsWrong(false);
       setWaitingForOpponent(true);
@@ -83,6 +84,11 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
         if (response.ok) {
           const data = await response.json();
           setPlayers(data);
+          const me = data.find((p: Player) => p.id === playerId);
+          if (me && playerPointsRef.current === 0 && me.score > 0) {
+            setPlayerPoints(me.score);
+            playerPointsRef.current = me.score;
+          }
         }
       } catch (err) {
         console.error("Kunde inte hämta spelare:", err);
@@ -118,7 +124,7 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
   const player2 = sortedPlayers[1];
   const hasLoadedPlayers = players.length > 0;
   const isYouPlayer1 = player1?.id === playerId;
-  //const isYouPlayer2 = player2?.id === playerId;
+  const isYouPlayer2 = player2?.id === playerId;
 
   // Hämtar alla möjliga ord från API:et
   const [currentWord, setCurrentWord] = useState<ApiWord | null>(null);
@@ -126,7 +132,7 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
   const [wordSlots, setWordSlots] = useState<string[]>([]);
   const [rolling, setRolling] = useState(true);
   const [diceIndices, setDiceIndices] = useState<number[]>([]);
-
+  const [revealedIndices, setRevealedIndices] = useState<number[]>([]);
   // Det som tar fram ett random ord
   const categories = ["brainrot", "countries", "capitals_of_countries", "sports", "animals", "programming_languages", "games", "pc_games", "mobile_games", "companies"];
   const randomCategory = categories[Math.floor(Math.random() * categories.length)];
@@ -193,6 +199,22 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
     setTimeout(() => setRolling(false), 1400);
   }
 
+  function buyHint() {
+    const alreadyRevealed = new Set([...diceIndices, ...revealedIndices]);
+    const hidden = wordSlots.map((_, i) => i).filter(i => !alreadyRevealed.has(i));
+    if (hidden.length === 0) return;
+    const pick = hidden[Math.floor(Math.random() * hidden.length)];
+    setRevealedIndices(prev => [...prev, pick]);
+    const newScore = playerPoints - wordLength;
+    setPlayerPoints(newScore);
+    playerPointsRef.current = newScore;
+    // needs a separate score-only endpoint (e.g. PATCH /api/players/{id}/score) that updates score without setting IsRoundReady=true
+    /* fetch(`http://localhost:5164/api/players/${playerId}/submit-round?newScore=${newScore}`, {
+      method: "POST"
+     }).catch(e => console.error("Kunde inte uppdatera poäng efter hint", e));*/
+  }
+
+
 
   useEffect(() => {
     if (!isYouPlayer1) return;
@@ -258,6 +280,7 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
       const slots = generateWordSlots(currentWord.word);
       setWordSlots(slots);
       setDiceIndices(randomIndices(slots));
+      setRevealedIndices([]);
     }
   }, [currentWord]);
 
@@ -327,7 +350,8 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
           <div className="info-card">
             <h2>Player 1</h2>
             <div className="player-circle"></div>
-            <p className="player-name">Player 1</p>
+            <p className="player-name">{player1?.playerName || "Loading..."}</p>
+            <p className="player-score">Points: {isYouPlayer1 ? playerPoints : player1?.score || 0}</p>
           </div>
 
           <div className="info-card hint-card">
@@ -338,6 +362,7 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
               className="secondary-button"
               type="button"
               disabled={!canUseHint}
+              onClick={buyHint}
             >
               Buy Hint
             </button>
@@ -353,6 +378,14 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
             type="button" onClick={reroll}
           >
             Reroll
+          </button>
+          <button className="back-button" type="button" onClick={() => {
+            const newScore = playerPoints + 10;
+            setPlayerPoints(newScore);
+            playerPointsRef.current = newScore;
+          }}
+            style={{ left: "auto", right: 100 }}>
+            +10 pts
           </button>
         </aside>
 
@@ -375,6 +408,7 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
             <DiceWordRow
               word={currentWord.word.toUpperCase()}
               diceIndices={diceIndices}
+              hintIndices={revealedIndices}
               rolling={rolling}
             />
 
@@ -477,7 +511,8 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
           <div className="info-card">
             <h2>Player 2</h2>
             <div className="player-circle opponent-circle"></div>
-            <p className="player-name">Player 2</p>
+            <p className="player-name">{player2?.playerName || "Waiting..."}</p>
+            <p className="player-score">Points: {isYouPlayer2 ? playerPoints : player2?.score || 0}</p>
           </div>
 
           <div className="info-card">
