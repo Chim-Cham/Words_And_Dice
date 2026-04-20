@@ -7,7 +7,7 @@ async function setupGame(page: any, playerScore: number = 0) {
     await route.fulfill({
       status: 200,
       contentType: 'application/json',
-      body: JSON.stringify([{ word: "tiger", category: "animals", length: 5 }])
+      body: JSON.stringify({ word: "tiger", category: "animals", length: 5 })
     });
   });
 

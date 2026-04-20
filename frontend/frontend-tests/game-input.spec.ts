@@ -51,7 +51,7 @@ test.describe('GamePage Input Logic (Enter-knapp/button)', () => {
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
-        body: JSON.stringify([{ word: "TIGER", category: "animals", length: 5 }])
+        body: JSON.stringify({ word: "TIGER", category: "animals", length: 5 })
       });
     });
 
