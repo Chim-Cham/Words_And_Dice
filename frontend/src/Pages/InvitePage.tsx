@@ -23,7 +23,7 @@ export function InvitePage({ gameId, onContinue, onBack }: InvitePageProps) {
     if (!gameId) return;
     const interval = setInterval(async () => {
       try {
-        const response = await fetch(`http://localhost:5164/api/games/${gameId}/players`);
+        const response = await fetch(`/api/games/${gameId}/players`);
         if (response.ok) {
           const players = await response.json();
           if (players.length >= 2) {
