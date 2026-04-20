@@ -94,7 +94,7 @@ test('buying a hint adds a yellow die to the board', async ({ page }) => {
 test('buying a hint reduces player points by word length', async ({ page }) => {
   await setupGame(page, 20);
   await page.getByRole('button', { name: 'Buy Hint' }).click();
-  await expect(page.getByText('Points: 15')).toBeVisible();
+  await expect(page.locator('.points-display-box')).toContainText('15');
 });
 
 test('hint die appears above a previously empty slot', async ({ page }) => {
@@ -111,7 +111,7 @@ test('buying two hints adds two yellow dice and deducts points twice', async ({ 
   await expect(page.locator('.die-face--hint')).toHaveCount(1);
   await page.getByRole('button', { name: 'Buy Hint' }).click();
   await expect(page.locator('.die-face--hint')).toHaveCount(2);
-  await expect(page.getByText('Points: 10')).toBeVisible();
+  await expect(page.locator('.points-display-box')).toContainText('10');
 });
 
 test('dice are horizontally centered over their word slots after landing', async ({ page }) => {
