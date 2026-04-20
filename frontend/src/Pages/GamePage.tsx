@@ -48,7 +48,7 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
   async function handleConfirmWord() {
     const guess = inputValue.trim().toUpperCase();
     if (currentWord && guess === currentWord.word.toUpperCase()) {
-      const newScore = playerPoints + 5;
+      const newScore = playerPoints + 10;
       setPlayerPoints(newScore);
       playerPointsRef.current = newScore;
       setLevelComplete(true);
@@ -348,9 +348,9 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
       <main className="game-layout">
         <aside className="game-side">
           <div className="info-card">
-            <h2>Player 1</h2>
+            {/* <h2>Player 1</h2> */}
+            <h2 className="player-name">{player1?.playerName || "Loading..."}</h2>
             <div className="player-circle"></div>
-            <p className="player-name">{player1?.playerName || "Loading..."}</p>
             <p className="player-score">Points: {isYouPlayer1 ? playerPoints : player1?.score || 0}</p>
           </div>
 
@@ -509,9 +509,9 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
 
         <aside className="game-side">
           <div className="info-card">
-            <h2>Player 2</h2>
+            {/* <h2>Player 2</h2> */}
+            <h2 className="player-name">{player2?.playerName || "Waiting..."}</h2>
             <div className="player-circle opponent-circle"></div>
-            <p className="player-name">{player2?.playerName || "Waiting..."}</p>
             <p className="player-score">Points: {isYouPlayer2 ? playerPoints : player2?.score || 0}</p>
           </div>
 
