@@ -6,10 +6,12 @@ const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZÅÄÖ";
 type Props = {
   word: string;
   diceIndices: number[];
+  hintIndices?: number[];
   rolling: boolean;
+
 };
 
-function DieSlot({ letter, rolling, hasDie }: { letter: string; rolling: boolean; hasDie: boolean }) {
+function DieSlot({ letter, rolling, hasDie, isHint }: { letter: string; rolling: boolean; hasDie: boolean; isHint: boolean }) {
   const [display, setDisplay] = useState("?");
   const [phase, setPhase] = useState<"rolling" | "idle" | "sliding" | "settled">("rolling");
 
@@ -31,11 +33,11 @@ function DieSlot({ letter, rolling, hasDie }: { letter: string; rolling: boolean
 
   return (
     <div className="dice-slot-col">
-      <div className="word-slot word-slot--empty">
+      <div className={`word-slot ${hasDie ? "word-slot--revealed" : "word-slot--empty"}`}>
       </div>
 
       {hasDie && (
-        <div className={`die-face die-face--${phase}`}>
+        <div className={`die-face die-face--${phase}${isHint ? " die-face--hint" : ""}`}>
           {display}
         </div>
       )}
@@ -43,17 +45,18 @@ function DieSlot({ letter, rolling, hasDie }: { letter: string; rolling: boolean
   );
 }
 
-export function DiceWordRow({ word, diceIndices, rolling }: Props) {
+export function DiceWordRow({ word, diceIndices, hintIndices = [], rolling }: Props) {
   const letters = word.toUpperCase().split("");
 
   return (
     <div className="dice-word-row">
       {letters.map((letter, i) => (
         <DieSlot
-          key={i}
+          key={`${i}-${hintIndices.includes(i) ? 'hint' : 'die'}`}
           letter={letter}
           rolling={rolling}
-          hasDie={diceIndices.includes(i)}
+          hasDie={diceIndices.includes(i) || hintIndices.includes(i)}
+          isHint={hintIndices.includes(i)}
         />
       ))}
     </div>
