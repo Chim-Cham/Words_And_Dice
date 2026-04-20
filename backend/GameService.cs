@@ -137,5 +137,45 @@ public class GameService
 
         return response.Models?.FirstOrDefault();
     }
+
+    public async Task<GuessResult> SubmitGuess(string gameId, string playerId, string guess)
+    {
+        // hämtar spelet
+        var gameResponse = await _client
+        .From<Game>()
+        .Where(g => g.Id == gameId)
+        .Get();
+
+        var game = gameResponse.Models?.FirstOrDefault();
+        if (game == null)
+            throw new Exception("Spelet hittades inte.");
+
+        // hämtar spelaren
+        var playerResponse = await _client
+        .From<Player>()
+        .Where(p => p.Id == playerId)
+        .Get();
+
+        var player = playerResponse.Models?.FirstOrDefault();
+        if (player == null)
+            throw new Exception("Spelaren hittades inte.");
+
+        // jämför gissning
+        bool correct = guess.ToUpper() == game.TargetWord.ToUpper();
+        int scoreChange = correct ? +5 : -5;
+
+        // uppdaterar resultat
+        player.Score += scoreChange;
+        player.LastGuess = guess;
+        await _client.From<Player>().Update(player);
+
+        // returnerar resultat
+        return new GuessResult
+        {
+            Correct = correct,
+            ScoreChange = scoreChange,
+            NewScore = player.Score
+        };
+    }
 }
 
