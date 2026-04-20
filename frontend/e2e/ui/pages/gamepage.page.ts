@@ -130,7 +130,7 @@ export class GamePage {
 
   async expectTextVisible(text: string) {
     // exact: false är viktigt här för att hantera dolda radbrytningar eller punkter
-    await expect(this.page.getByText(text, { exact: false })).toBeVisible({ timeout: 10000 });
+    await expect(this.page.getByText(text, { exact: false }).first()).toBeVisible({ timeout: 10000 });
   }
 
   async expectPointsVisible(pointsText: string) {

@@ -27,6 +27,13 @@ export default defineConfig({
         ...devices["Desktop Chrome"],
       },
     },
+    {
+      name: "frontend-tests",
+      testDir: "./frontend-tests",
+      use: {
+        ...devices["Desktop Chrome"],
+      },
+    },
   ],
   webServer: {
     command: "npm run dev",

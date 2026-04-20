@@ -1,6 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import "../css/GamePage.css";
 import { DiceWordRow } from "../components/DiceWordRow";
+
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5164";
 
 type GamePageProps = {
   gameId: string;
@@ -47,6 +49,7 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
   const [level, setLevel] = useState(1);
   const [levelComplete, setLevelComplete] = useState(false);
   const [playerPoints, setPlayerPoints] = useState(0);
+  const playerPointsRef = useRef(0);
   const [inputValue, setInputValue] = useState("");
   const [isWrong, setIsWrong] = useState(false);
   const [waitingForOpponent, setWaitingForOpponent] = useState(false);
@@ -59,6 +62,7 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
     if (currentWord && guess === currentWord.word.toUpperCase()) {
       const newScore = playerPoints + 5;
       setPlayerPoints(newScore);
+      playerPointsRef.current = newScore;
       setLevelComplete(true);
       setIsWrong(false);
       setWaitingForOpponent(true);
@@ -88,6 +92,11 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
         if (response.ok) {
           const data = await response.json();
           setPlayers(data);
+          const me = data.find((p: Player) => p.id === playerId);
+          if (me && playerPointsRef.current === 0 && me.score > 0) {
+            setPlayerPoints(me.score);
+            playerPointsRef.current = me.score;
+          }
         }
       } catch (err) {
         console.error("Kunde inte hämta spelare:", err);
@@ -138,12 +147,11 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
 
   // Det som tar fram ett random ord - kategorier matchar externa API:et
 
-
   //send word to database
   useEffect(() => {
     const syncGame = async () => {
       try {
-        const res = await fetch(`http://localhost:5164/api/games/${gameId}`);
+        const res = await fetch(`${API_URL}/api/games/${gameId}`);
         if (res.ok) {
           const data = await res.json();
           //setGameInfo(data);
@@ -347,7 +355,9 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
             <h2>Player 1 {isYouPlayer1 ? "(You)" : ""}</h2>
             <div className="player-circle"></div>
             <p className="player-name">{player1?.playerName || "Loading..."}</p>
-            <p className="player-score">Points: {player1?.score || 0}</p>
+            <p className="player-score">
+              Points: {isYouPlayer1 ? playerPoints : player1?.score || 0}
+            </p>
           </div>
 
           <div className="info-card hint-card">
@@ -375,6 +385,18 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
             onClick={reroll}
           >
             Reroll
+          </button>
+          <button
+            className="back-button"
+            type="button"
+            onClick={() => {
+              const newScore = playerPoints + 10;
+              setPlayerPoints(newScore);
+              playerPointsRef.current = newScore;
+            }}
+            style={{ left: "auto", right: 100 }}
+          >
+            +10 pts
           </button>
         </aside>
 
@@ -428,6 +450,15 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
                 setInputValue(e.target.value);
                 setIsWrong(false);
               }}
+              onKeyDown={(e) => {
+                if (
+                  e.key === "Enter" &&
+                  !waitingForOpponent &&
+                  inputValue.trim() !== ""
+                ) {
+                  handleConfirmWord();
+                }
+              }}
             />
 
             {isWrong && (
@@ -451,9 +482,7 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
             </button>
 
             {waitingForOpponent && (
-              <div
-                className="level-complete-panel"
-              >
+              <div className="level-complete-panel">
                 {!isGameOver ? (
                   <>
                     {levelComplete ? (
@@ -465,12 +494,8 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
                   </>
                 ) : (
                   <div className="game-over-content">
-                    <h2 className="game-over-title">
-                      Game Over!
-                    </h2>
-                    <h3 className="game-over-winner">
-                      {winnerText}
-                    </h3>
+                    <h2 className="game-over-title">Game Over!</h2>
+                    <h3 className="game-over-winner">{winnerText}</h3>
                     <button className="primary-button" onClick={onBack}>
                       Return to Start
                     </button>
@@ -498,7 +523,9 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
             <h2>Player 2 {isYouPlayer2 ? "(You)" : ""}</h2>
             <div className="player-circle opponent-circle"></div>
             <p className="player-name">{player2?.playerName || "Waiting..."}</p>
-            <p className="player-score">Points: {player2?.score || 0}</p>
+            <p className="player-score">
+              Points: {isYouPlayer2 ? playerPoints : player2?.score || 0}
+            </p>
           </div>
 
           <div className="info-card">
