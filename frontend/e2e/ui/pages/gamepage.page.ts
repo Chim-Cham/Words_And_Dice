@@ -46,7 +46,7 @@ export class GamePage {
       await route.fulfill({
         status: 200,
         contentType: "application/json",
-        body: JSON.stringify([{ word: "CAT", category: "Animals", length: 3 }]),
+        body: JSON.stringify({ word: "CAT", category: "Animals", length: 3 }),
       });
     });
 

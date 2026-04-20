@@ -22,12 +22,11 @@ Feature: Game page
         When I type "CAT" in the word input
         And I click the button "Confirm Word"
         Then I should see the text "Correct! +5 points"
-        And I should see the button "Next Level"
+        And I should see the text "Waiting for Player 2..."
 
-    Scenario: User gets points and moves to the next level
+    Scenario: User gets points and waits for next level
         Given I open the GamePage
         When I type "CAT" in the word input
         And I click the button "Confirm Word"
-        And I click the button "Next Level"
-        Then I should see the text "Level 2 / 25"
-        And I should see the points "Points: 5"
+        Then I should see the text "Points: 5"
+        And I should see the text "Waiting for Player 2..."
