@@ -74,7 +74,7 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
       } catch (err) {
         console.error("Kunde inte hämta spelare:", err);
       }
-    }
+    };
     fetchPlayers();
     const interval = setInterval(fetchPlayers, 1000);
     return () => clearInterval(interval);
@@ -385,6 +385,11 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
               onChange={(e) => {
                 setInputValue(e.target.value);
                 setIsWrong(false);
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !waitingForOpponent && inputValue.trim() !== "") {
+                  handleConfirmWord();
+                }
               }}
             />
 
