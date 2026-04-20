@@ -118,7 +118,7 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
   const player2 = sortedPlayers[1];
   const hasLoadedPlayers = players.length > 0;
   const isYouPlayer1 = player1?.id === playerId;
-  const isYouPlayer2 = player2?.id === playerId;
+  //const isYouPlayer2 = player2?.id === playerId;
 
   // Hämtar alla möjliga ord från API:et
   const [currentWord, setCurrentWord] = useState<ApiWord | null>(null);
