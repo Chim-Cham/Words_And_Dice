@@ -4,13 +4,15 @@ import { InvitePage } from "./Pages/InvitePage";
 import { GamePage } from "./Pages/GamePage";
 import { JoinPage } from "./Pages/JoinPage";
 
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5164";
+
 function App() {
   const [page, setPage] = useState<"start" | "invite" | "game" | "join">("start");
   const [gameId, setGameId] = useState("");
   const [playerId, setPlayerId] = useState("");
   const [username, setUsername] = useState("");
 
-  console.log(import.meta.env.VITE_API_URL);
+  console.log(import.meta.env.VITE_API_URL, API_URL);
 
   useEffect(() => {
     const path = window.location.pathname;
@@ -27,7 +29,7 @@ function App() {
 
   async function handleStartGame(username: string) {
     try {
-      const response = await fetch(`/api/games?name=${username}`, {
+      const response = await fetch(`${API_URL}/api/games?name=${username}`, {
         method: "POST"
       });
 
@@ -39,7 +41,7 @@ function App() {
       if (idFromServer) {
         setGameId(idFromServer);
         try {
-          const playerRes = await fetch(`/api/games/${idFromServer}/players`);
+          const playerRes = await fetch(`${API_URL}/api/games/${idFromServer}/players`);
           if (playerRes.ok) {
             const players = await playerRes.json();
             if (players.length > 0) {
@@ -68,7 +70,7 @@ function App() {
     if (!enteredGameId.trim() || !joinUsername.trim()) return alert("Missing information");
 
     try {
-      const response = await fetch(`/api/games/${enteredGameId}/players?name=${username}`, {
+      const response = await fetch(`${API_URL}/api/games/${enteredGameId}/players?name=${username}`, {
         method: "POST"
       });
 
