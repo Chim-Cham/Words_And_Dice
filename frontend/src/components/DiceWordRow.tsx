@@ -33,7 +33,7 @@ function DieSlot({ letter, rolling, hasDie, isHint }: { letter: string; rolling:
 
   return (
     <div className="dice-slot-col">
-      <div className="word-slot word-slot--empty">
+      <div className={`word-slot ${hasDie ? "word-slot--revealed" : "word-slot--empty"}`}>
       </div>
 
       {hasDie && (
@@ -52,7 +52,7 @@ export function DiceWordRow({ word, diceIndices, hintIndices = [], rolling }: Pr
     <div className="dice-word-row">
       {letters.map((letter, i) => (
         <DieSlot
-          key={i}
+          key={`${i}-${hintIndices.includes(i) ? 'hint' : 'die'}`}
           letter={letter}
           rolling={rolling}
           hasDie={diceIndices.includes(i) || hintIndices.includes(i)}
