@@ -6,7 +6,6 @@ type GamePageProps = {
   gameId: string;
   playerId: string;
   onBack: () => void;
-
 };
 
 type ApiWord = {
@@ -14,8 +13,6 @@ type ApiWord = {
   category: string;
   length: number;
 };
-
-
 
 type Player = {
   id: string;
@@ -38,7 +35,6 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
   const [waitingForOpponent, setWaitingForOpponent] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(false);
 
-
   // Kontrollerar spelarens gissning mot det rätta svaret.
   // Ger +5 poäng vid rätt svar annars markeras fel.
   async function handleConfirmWord() {
@@ -50,12 +46,17 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
       setIsWrong(false);
       setWaitingForOpponent(true);
       try {
-        await fetch(`http://localhost:5164/api/players/${playerId}/submit-round?newScore=${newScore}`, {
-          method: "POST"
-          // headers: { "Content-Type": "application/json" },
-          // body: JSON.stringify(newScore)
-        });
-      } catch (e) { console.error("Kunde inte skicka poäng", e); }
+        await fetch(
+          `http://localhost:5164/api/players/${playerId}/submit-round?newScore=${newScore}`,
+          {
+            method: "POST",
+            // headers: { "Content-Type": "application/json" },
+            // body: JSON.stringify(newScore)
+          },
+        );
+      } catch (e) {
+        console.error("Kunde inte skicka poäng", e);
+      }
     } else {
       setIsWrong(true);
     }
@@ -64,7 +65,9 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
   useEffect(() => {
     const fetchPlayers = async () => {
       try {
-        const response = await fetch(`http://localhost:5164/api/games/${gameId}/players`);
+        const response = await fetch(
+          `http://localhost:5164/api/games/${gameId}/players`,
+        );
         if (response.ok) {
           const data = await response.json();
           setPlayers(data);
@@ -72,7 +75,7 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
       } catch (err) {
         console.error("Kunde inte hämta spelare:", err);
       }
-    }
+    };
     fetchPlayers();
     const interval = setInterval(fetchPlayers, 1000);
     return () => clearInterval(interval);
@@ -90,11 +93,14 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
   useEffect(() => {
     if (timeLeft === 0 && !waitingForOpponent) {
       setWaitingForOpponent(true);
-      fetch(`http://localhost:5164/api/players/${playerId}/submit-round?newScore=${playerPoints}`, {
-        method: "POST"
-        // headers: { "Content-Type": "application/json" },
-        // body: JSON.stringify(playerPoints)
-      }).catch(e => console.error(e));
+      fetch(
+        `http://localhost:5164/api/players/${playerId}/submit-round?newScore=${playerPoints}`,
+        {
+          method: "POST",
+          // headers: { "Content-Type": "application/json" },
+          // body: JSON.stringify(playerPoints)
+        },
+      ).catch((e) => console.error(e));
     }
   }, [timeLeft, waitingForOpponent, playerId, playerPoints]);
 
@@ -113,11 +119,25 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
   const [rolling, setRolling] = useState(true);
   const [diceIndices, setDiceIndices] = useState<number[]>([]);
 
-  // Det som tar fram ett random ord
-  const categories = ["brainrot", "countries", "capitals_of_countries", "sports", "animals", "programming_languages", "games", "pc_games", "mobile_games", "companies"];
-  const randomCategory = categories[Math.floor(Math.random() * categories.length)];
-
-  const randomLength = Math.floor(Math.random() * 8) + 3; // ordlängd på mellan 3-10 bokstäver (8 + 3)
+  // Det som tar fram ett random ord - kategorier matchar externa API:et
+  const categories = [
+    "brainrot",
+    "countries",
+    "capitals",
+    "sports",
+    "animals",
+    "programming_languages",
+    "games",
+    "games-pc",
+    "games-mobile",
+    "companies",
+    "wordle",
+    "birds",
+    "softwares",
+    "games-console",
+  ];
+  const randomCategory =
+    categories[Math.floor(Math.random() * categories.length)];
 
   //send word to database
   useEffect(() => {
@@ -139,16 +159,22 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
           }
 
           // Om du är Player 2 och ordet har dykt upp i databasen
-          if (!isYouPlayer1 && data.targetWord && (!currentWord || data.targetWord !== currentWord.word)) {
+          if (
+            !isYouPlayer1 &&
+            data.targetWord &&
+            (!currentWord || data.targetWord !== currentWord.word)
+          ) {
             setCurrentWord({
               word: data.targetWord,
               category: data.category,
-              length: data.targetWord.length
+              length: data.targetWord.length,
             });
             setLoading(false);
           }
         }
-      } catch (err) { console.error(err); }
+      } catch (err) {
+        console.error(err);
+      }
     };
     const interval = setInterval(syncGame, 1000);
     return () => clearInterval(interval);
@@ -164,7 +190,7 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
     }
 
     return letters.map((letter, index) =>
-      revealedIndexes.has(index) ? letter : ""
+      revealedIndexes.has(index) ? letter : "",
     );
   }
   function randomIndices(slots: string[]) {
@@ -179,37 +205,41 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
     setTimeout(() => setRolling(false), 1400);
   }
 
-
   useEffect(() => {
     if (!isYouPlayer1) return;
     async function loadWord() {
-      try {
-        const res = await fetch(`http://localhost:5164/api/word/${randomCategory}/${randomLength}`);
-        const data = await res.json();
+      const shuffled = [...categories].sort(() => Math.random() - 0.5);
+      for (const cat of shuffled) {
+        try {
+          const res = await fetch(
+            `http://localhost:5164/api/word/${cat}/level/${level}`,
+          );
+          if (!res.ok) continue;
+          const data = await res.json();
+          if (!data.word) continue;
 
-        const wordObj = data[0];
+          const newWord = {
+            word: data.word,
+            category: data.category,
+            length: data.word.length,
+          };
+          setCurrentWord(newWord);
 
-        const newWord = {
-          word: wordObj.word,
-          category: wordObj.category,
-          length: wordObj.length
-        };
-        setCurrentWord(newWord);
-
-        await fetch(`http://localhost:5164/api/games/${gameId}/word`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(newWord)
-        });
-
-      } catch (err) {
-        console.error("Failed to fetch word:", err);
-      } finally {
-        setLoading(false);
+          await fetch(`http://localhost:5164/api/games/${gameId}/word`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(newWord),
+          });
+          return;
+        } catch (err) {
+          console.error(`Failed to fetch word for category ${cat}:`, err);
+        }
       }
+      console.error("Could not fetch a word for any category.");
+      setLoading(false);
     }
 
-    loadWord();
+    loadWord().finally(() => setLoading(false));
   }, [isYouPlayer1, level]);
 
   useEffect(() => {
@@ -222,7 +252,6 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
     const isLastRound = level >= 25;
 
     if (p1Ready && p2Ready && !isTransitioning) {
-
       if (p1Ready && p2Ready && !isTransitioning) {
         if (hasWinner || isLastRound) {
           return;
@@ -230,9 +259,11 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
       }
 
       setIsTransitioning(true);
-      fetch(`http://localhost:5164/api/games/${gameId}/next-round`, { method: "POST" })
+      fetch(`http://localhost:5164/api/games/${gameId}/next-round`, {
+        method: "POST",
+      })
         .then(() => setTimeout(() => setIsTransitioning(false), 2000)) // Pausa låset i 2s
-        .catch(err => {
+        .catch((err) => {
           console.error(err);
           setIsTransitioning(false);
         });
@@ -247,11 +278,11 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
     }
   }, [currentWord]);
 
-  useEffect(() => {                                     // ← and this
+  useEffect(() => {
+    // ← and this
     const t = setTimeout(() => setRolling(false), 1400);
     return () => clearTimeout(t);
   }, []);
-
 
   if (!hasLoadedPlayers || loading || !currentWord) {
     return (
@@ -259,15 +290,18 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
         <div className="loading-container">
           <span className="loader-dice"></span>
           <p>Loading word...</p>
-          {!hasLoadedPlayers && <p style={{ fontSize: '12px' }}>Syncing players...</p>}
-          {hasLoadedPlayers && !currentWord && <p style={{ fontSize: '12px' }}>Waiting for Host to pick a word...</p>}
+          {!hasLoadedPlayers && (
+            <p className="loading-small-text">Syncing players...</p>
+          )}
+          {hasLoadedPlayers && !currentWord && (
+            <p className="loading-small-text">
+              Waiting for Host to pick a word...
+            </p>
+          )}
         </div>
       </div>
     );
   }
-
-
-
 
   const wordLength = currentWord.length;
   //const correctAnswer = currentWord.word.toUpperCase();
@@ -277,7 +311,9 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
   const canUseHint = playerPoints >= wordLength;
 
   const bothReady = player1?.isRoundReady && player2?.isRoundReady;
-  const isGameOver = bothReady && (level >= 25 || (player1?.score >= 100 || player2?.score >= 100));
+  const isGameOver =
+    bothReady &&
+    (level >= 25 || player1?.score >= 100 || player2?.score >= 100);
   let winnerText = "";
   if (isGameOver) {
     if (player1.score > player2.score) {
@@ -289,7 +325,8 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
     }
   }
 
-  const isInputDisabled = !isPlayerTurn || timeLeft === 0 || levelComplete || waitingForOpponent;
+  const isInputDisabled =
+    !isPlayerTurn || timeLeft === 0 || levelComplete || waitingForOpponent;
 
   return (
     <div className="game-page">
@@ -306,7 +343,9 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
 
       <main className="game-layout">
         <aside className="game-side">
-          <div className={`info-card ${isYouPlayer1 ? "local-player-highlight" : ""}`}>
+          <div
+            className={`info-card ${isYouPlayer1 ? "local-player-highlight" : ""}`}
+          >
             <h2>Player 1 {isYouPlayer1 ? "(You)" : ""}</h2>
             <div className="player-circle"></div>
             <p className="player-name">{player1?.playerName || "Loading..."}</p>
@@ -332,8 +371,11 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
             )}
           </div>
           {/* THIS IS TEMPORARY FOR TESTING REMOVE BEFORE PUSH TO MAIN*/}
-          <button className="back-button" type="button" onClick={reroll}
-            style={{ left: "auto", right: 20 }}>
+          <button
+            className="back-button reroll-button"
+            type="button"
+            onClick={reroll}
+          >
             Reroll
           </button>
         </aside>
@@ -342,16 +384,20 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
           <div className="top-row">
             <div className="category-box">Category: {category}</div>
 
-            <div className="timer-box" style={{ color: timeLeft <= 10 ? 'red' : 'inherit', fontWeight: 'bold', fontSize: '1.2rem' }}>
+            <div
+              className={`timer-box${timeLeft <= 10 ? " timer-box--urgent" : ""}`}
+            >
               Time: {timeLeft}s
             </div>
 
             <div className="status-box">
-              {timeLeft === 0 ? "Time is up!" : (waitingForOpponent ? "Waiting for opponent" : "Your turn")}
+              {timeLeft === 0
+                ? "Time is up!"
+                : waitingForOpponent
+                  ? "Waiting for opponent"
+                  : "Your turn"}
             </div>
           </div>
-
-
 
           <div className="word-area">
             <DiceWordRow
@@ -387,9 +433,7 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
             />
 
             {isWrong && (
-              <p className="wrong-answer-text">
-                Wrong answer, try again!
-              </p>
+              <p className="wrong-answer-text">Wrong answer, try again!</p>
             )}
 
             <div className="word-actions-row">
@@ -405,12 +449,13 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
               disabled={waitingForOpponent || inputValue.trim() === ""}
             >
               {/* </button><button className="primary-button" type="button" disabled={isInputDisabled}> */}
-
               Confirm Word
             </button>
 
             {waitingForOpponent && (
-              <div className="level-complete-panel" style={{ marginTop: "15px" }}>
+              <div
+                className="level-complete-panel"
+              >
                 {!isGameOver ? (
                   <>
                     {levelComplete ? (
@@ -421,19 +466,17 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
                     <p>Waiting for Player {isYouPlayer1 ? "2" : "1"}...</p>
                   </>
                 ) : (
-
-                  <div className="game-over-content" style={{ textAlign: "center" }}>
-                    <h2 style={{ color: "#ffd700", marginBottom: "10px", fontSize: "2rem" }}>
+                  <div className="game-over-content">
+                    <h2 className="game-over-title">
                       Game Over!
                     </h2>
-                    <h3 style={{ fontSize: "1.5rem", marginBottom: "20px", color: "white" }}>
+                    <h3 className="game-over-winner">
                       {winnerText}
                     </h3>
                     <button className="primary-button" onClick={onBack}>
                       Return to Start
                     </button>
                   </div>
-
                 )}
               </div>
             )}
@@ -451,7 +494,9 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
         </section>
 
         <aside className="game-side">
-          <div className={`info-card ${isYouPlayer2 ? "local-player-highlight" : ""}`}>
+          <div
+            className={`info-card ${isYouPlayer2 ? "local-player-highlight" : ""}`}
+          >
             <h2>Player 2 {isYouPlayer2 ? "(You)" : ""}</h2>
             <div className="player-circle opponent-circle"></div>
             <p className="player-name">{player2?.playerName || "Waiting..."}</p>
