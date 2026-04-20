@@ -1,7 +1,9 @@
 import { test, expect } from '@playwright/test';
 
 async function setupGame(page: any, playerScore: number = 0) {
-  await page.route('http://localhost:5164/api/word/*/*', async (route: any) => {
+
+
+  await page.route(/\/api\/word\/[^/]+\/[^/]+/, async (route: any) => {
     await route.fulfill({
       status: 200,
       contentType: 'application/json',
