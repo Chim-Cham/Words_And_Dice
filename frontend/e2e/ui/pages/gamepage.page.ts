@@ -42,7 +42,7 @@ export class GamePage {
     });
 
     // 3. Mocka: Hämta ett slumpmässigt ord
-    await this.page.route("**/api/word/*/*", async (route) => {
+    await this.page.route("**/api/word/**", async (route) => {
       await route.fulfill({
         status: 200,
         contentType: "application/json",

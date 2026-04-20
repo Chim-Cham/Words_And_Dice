@@ -21,6 +21,23 @@ type Player = {
   isRoundReady: boolean;
 };
 
+const categories = [
+  "brainrot",
+  "countries",
+  "capitals",
+  "sports",
+  "animals",
+  "programming_languages",
+  "games",
+  "games-pc",
+  "games-mobile",
+  "companies",
+  "wordle",
+  "birds",
+  "softwares",
+  "games-console",
+];
+
 export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
   const [showInstructions, setShowInstructions] = useState(false);
   const [players, setPlayers] = useState<Player[]>([]);
@@ -120,24 +137,7 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
   const [diceIndices, setDiceIndices] = useState<number[]>([]);
 
   // Det som tar fram ett random ord - kategorier matchar externa API:et
-  const categories = [
-    "brainrot",
-    "countries",
-    "capitals",
-    "sports",
-    "animals",
-    "programming_languages",
-    "games",
-    "games-pc",
-    "games-mobile",
-    "companies",
-    "wordle",
-    "birds",
-    "softwares",
-    "games-console",
-  ];
-  const randomCategory =
-    categories[Math.floor(Math.random() * categories.length)];
+
 
   //send word to database
   useEffect(() => {
@@ -240,7 +240,7 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
     }
 
     loadWord().finally(() => setLoading(false));
-  }, [isYouPlayer1, level]);
+  }, [isYouPlayer1, level, gameId]);
 
   useEffect(() => {
     if (!isYouPlayer1 || players.length < 2) return;
@@ -252,10 +252,8 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
     const isLastRound = level >= 25;
 
     if (p1Ready && p2Ready && !isTransitioning) {
-      if (p1Ready && p2Ready && !isTransitioning) {
-        if (hasWinner || isLastRound) {
-          return;
-        }
+      if (hasWinner || isLastRound) {
+        return;
       }
 
       setIsTransitioning(true);
