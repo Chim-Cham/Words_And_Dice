@@ -63,7 +63,7 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
   const categories = [
     "brainrot", "countries", "capitals", "sports", "animals",
     "programming_languages", "games", "games-pc", "games-mobile",
-    "companies", "wordle", "birds", "softwares", "games-console",
+    "companies", "birds", "softwares", "games-console",
   ];
 
   async function handleConfirmWord() {
@@ -109,7 +109,7 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
           const data = await response.json();
           setPlayers(data);
           const me = data.find((p: Player) => p.id === playerId);
-          if (me && playerPointsRef.current === 0 && me.score > 0) {
+          if (me && !waitingForOpponent && me.score > playerPointsRef.current) {
             setPlayerPoints(me.score);
             playerPointsRef.current = me.score;
           }
@@ -121,7 +121,7 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
     fetchPlayers();
     const interval = setInterval(fetchPlayers, 1000);
     return () => clearInterval(interval);
-  }, [gameId]);
+  }, [gameId, waitingForOpponent]);
 
   useEffect(() => {
     if (timeLeft <= 0 || waitingForOpponent) return;
@@ -163,6 +163,7 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
             setTimeLeft(45);
             setIsWrong(false);
             setLoading(true);
+            setRevealedIndices([]);
             setCurrentWord(null);
             sessionStorage.removeItem(`timeLeft_${playerId}`);
             sessionStorage.removeItem(`waitingForOpponent_${playerId}`);
@@ -208,7 +209,7 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
   function randomIndices(slots: string[]) {
     const indices = slots.map((_, i) => i);
     indices.sort(() => Math.random() - 0.5);
-    return indices.slice(0, 2);
+    return indices.slice(0, Math.min(4, slots.length));
   }
 
   function reroll() {
