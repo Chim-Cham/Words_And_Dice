@@ -207,9 +207,9 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
   }
 
   function randomIndices(slots: string[]) {
-    const indices = slots.map((_, i) => i);
-    indices.sort(() => Math.random() - 0.5);
-    return indices.slice(0, Math.min(4, slots.length));
+    const hiddenIndices = slots.map((s, i) => s === "" ? i : -1).filter(i => i !== -1);
+    hiddenIndices.sort(() => Math.random() - 0.5);
+    return hiddenIndices.slice(0, Math.min(2, hiddenIndices.length));
   }
 
   function reroll() {
@@ -319,7 +319,10 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
     } else {
       const slots = generateWordSlots(currentWord.word);
       setWordSlots(slots);
-      setDiceIndices(randomIndices(slots));
+      // Only place dice on hidden slots (not the 2 pre-revealed ones)
+      const hiddenIndices = slots.map((s, i) => s === "" ? i : -1).filter(i => i !== -1);
+      const shuffled = [...hiddenIndices].sort(() => Math.random() - 0.5);
+      setDiceIndices(shuffled.slice(0, Math.min(2, shuffled.length)));
       setRevealedIndices([]);
     }
   }, [currentWord]);
