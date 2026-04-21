@@ -39,7 +39,7 @@ export function InvitePage({ gameId, onContinue, onBack }: InvitePageProps) {
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [gameId]);
+  }, [gameId, onContinue]);
 
   return (
     <div className="invite-container">

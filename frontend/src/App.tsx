@@ -7,12 +7,21 @@ import { JoinPage } from "./Pages/JoinPage";
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5164";
 
 function App() {
-  const [page, setPage] = useState<"start" | "invite" | "game" | "join">("start");
-  const [gameId, setGameId] = useState("");
-  const [playerId, setPlayerId] = useState("");
-  const [username, setUsername] = useState("");
+  const [page, setPage] = useState<"start" | "invite" | "game" | "join">(
+    () => (sessionStorage.getItem("page") as any) || "start"
+  );
+  const [gameId, setGameId] = useState(() => sessionStorage.getItem("gameId") || "");
+  const [playerId, setPlayerId] = useState(() => sessionStorage.getItem("playerId") || "");
+  const [username, setUsername] = useState(() => sessionStorage.getItem("username") || "");
 
   console.log(import.meta.env.VITE_API_URL, API_URL);
+
+  useEffect(() => {
+    sessionStorage.setItem("page", page);
+    sessionStorage.setItem("gameId", gameId);
+    sessionStorage.setItem("playerId", playerId);
+    sessionStorage.setItem("username", username);
+  }, [page, gameId, playerId, username]);
 
   useEffect(() => {
     const path = window.location.pathname;
@@ -96,7 +105,13 @@ function App() {
   }
 
   if (page === "invite") {
-    return <InvitePage gameId={gameId} onContinue={handleContinue} onBack={() => setPage("start")} />;
+    return <InvitePage gameId={gameId} onContinue={handleContinue} onBack={() => {
+      sessionStorage.clear();
+      setGameId("");
+      setPlayerId("");
+      setPage("start");
+    }}
+    />
   }
 
   if (page === "game") {
@@ -104,7 +119,12 @@ function App() {
       <GamePage
         gameId={gameId}
         playerId={playerId}
-        onBack={() => setPage("start")}
+        onBack={() => {
+          sessionStorage.clear();
+          setGameId("");
+          setPlayerId("");
+          setPage("start");
+        }}
       />
     );
   }
@@ -116,6 +136,9 @@ function App() {
         initialUsername={username}
         onJoinGame={handleJoinSubmit}
         onBack={() => {
+          sessionStorage.clear();
+          setGameId("");
+          setPlayerId("");
           window.history.pushState({}, "", "/");
           setPage("start");
         }}
