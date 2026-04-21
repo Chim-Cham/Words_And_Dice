@@ -314,6 +314,7 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
   }, [players, isYouPlayer1, isTransitioning, gameId, level]);
 
   useEffect(() => {
+    //remove before main push
     console.log("currentWord effect - word:", currentWord?.word, "prev:", prevWordRef.current, "savedWord:", sessionStorage.getItem(`currentWord_${playerId}`));
     if (!currentWord) return;
     if (currentWord.word === prevWordRef.current) return;
@@ -330,14 +331,15 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
       setDiceIndices(JSON.parse(savedDice));
       setRevealedIndices(savedRevealed ? JSON.parse(savedRevealed) : []);
     }
-    
+
     else {
       const slots = generateWordSlots(currentWord.word);
       setWordSlots(slots);
-      // Only place dice on hidden slots (not the 2 pre-revealed ones)
+      // Only place dice on hidden slots
       const hiddenIndices = slots.map((s, i) => s === "" ? i : -1).filter(i => i !== -1);
       const shuffled = [...hiddenIndices].sort(() => Math.random() - 0.5);
       setDiceIndices(shuffled.slice(0, Math.min(2, shuffled.length)));
+      //remove before main push
       console.log("word:", currentWord.word, "diceIndices:", shuffled.slice(0, Math.min(2, shuffled.length)), "wordSlots:", slots);
       setRevealedIndices([]);
     }
@@ -433,9 +435,11 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
               </p>
             )}
           </div>
+          {/*remove before main push*/}
           <button className="reroll-button" type="button" onClick={reroll}>
             Reroll
           </button>
+          {/*remove before main push*/}
           <button
             className="point-button"
             type="button"
