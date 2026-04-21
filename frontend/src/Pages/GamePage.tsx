@@ -26,17 +26,25 @@ type Player = {
 export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
   const [showInstructions, setShowInstructions] = useState(false);
   const [players, setPlayers] = useState<Player[]>([]);
-  const [timeLeft, setTimeLeft] = useState(45); //change here if we need to have a longer display time
+  const [timeLeft, setTimeLeft] = useState(() => {
+    const saved = sessionStorage.getItem(`timeLeft_${playerId}`);
+    return saved ? parseInt(saved) : 45;
+  });
+  const [waitingForOpponent, setWaitingForOpponent] = useState(() => {
+    return sessionStorage.getItem(`waitingForOpponent_${playerId}`) === "true";
+  }); //change here if we need to have a longer display time
   //const [gameInfo, setGameInfo] = useState<any>(null);
 
   // State för att hålla koll på poäng och gissningar
-  const [level, setLevel] = useState(1);
+  const [level, setLevel] = useState(() => {
+    const saved = sessionStorage.getItem(`level_${playerId}`);
+    return saved ? parseInt(saved) : 1;
+  });
   const [levelComplete, setLevelComplete] = useState(false);
   const [playerPoints, setPlayerPoints] = useState(0);
   const playerPointsRef = useRef(0);
   const [inputValue, setInputValue] = useState("");
   const [isWrong, setIsWrong] = useState(false);
-  const [waitingForOpponent, setWaitingForOpponent] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(false);
 
   // Kontrollerar spelarens gissning mot det rätta svaret.
@@ -52,6 +60,18 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
       setWaitingForOpponent(true);
 
       try {
+<<<<<<< HEAD
+        await fetch(`${API_URL}/api/players/${playerId}/submit-round?newScore=${newScore}`, {
+          method: "POST"
+          // headers: { "Content-Type": "application/json" },
+          // body: JSON.stringify(newScore)
+        });
+      } catch (e) { console.error("Kunde inte skicka poäng", e); }
+    }
+    else {
+      // Wrong answer: let the player retry.
+      // Do NOT call submit-round here — it sets isRoundReady=true and ends the round.
+=======
         await fetch(
           `${API_URL}/api/players/${playerId}/submit-round?newScore=${newScore}`,
           {
@@ -64,9 +84,13 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
         console.error("Kunde inte skicka poäng", e);
       }
     } else {
+>>>>>>> ace521cafa022639b4f81566d6647d57b6fe201e
       const newScore = Math.max(0, playerPoints - 5);
       setPlayerPoints(newScore);
+      playerPointsRef.current = newScore;
       setIsWrong(true);
+<<<<<<< HEAD
+=======
 
       try {
         await fetch(
@@ -76,8 +100,16 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
       } catch (e) {
         console.error("Kunde inte skicka poäng", e);
       }
+>>>>>>> ace521cafa022639b4f81566d6647d57b6fe201e
     }
+
   }
+
+  useEffect(() => {
+    sessionStorage.setItem(`timeLeft_${playerId}`, String(timeLeft));
+    sessionStorage.setItem(`waitingForOpponent_${playerId}`, String(waitingForOpponent));
+    sessionStorage.setItem(`level_${playerId}`, String(level));
+  }, [timeLeft, waitingForOpponent, level, playerId]);
 
   useEffect(() => {
     const fetchPlayers = async () => {
@@ -174,6 +206,11 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
             setTimeLeft(45);
             setIsWrong(false);
             setLoading(true);
+            setCurrentWord(null);
+            sessionStorage.removeItem(`timeLeft_${playerId}`);
+            sessionStorage.removeItem(`waitingForOpponent_${playerId}`);
+            sessionStorage.removeItem(`level_${playerId}`);
+
           }
 
           // Om du är Player 2 och ordet har dykt upp i databasen
@@ -230,8 +267,13 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
       .filter((i) => !alreadyRevealed.has(i));
     if (hidden.length === 0) return;
     const pick = hidden[Math.floor(Math.random() * hidden.length)];
+<<<<<<< HEAD
+    setRevealedIndices(prev => [...prev, pick]);
+    const newScore = playerPoints - currentWord!.length;
+=======
     setRevealedIndices((prev) => [...prev, pick]);
     const newScore = playerPoints - wordLength;
+>>>>>>> ace521cafa022639b4f81566d6647d57b6fe201e
     setPlayerPoints(newScore);
     playerPointsRef.current = newScore;
     // needs a separate score-only endpoint (e.g. PATCH /api/players/{id}/score) that updates score without setting IsRoundReady=true
@@ -243,6 +285,46 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
   useEffect(() => {
     if (!isYouPlayer1) return;
     async function loadWord() {
+<<<<<<< HEAD
+      try {
+        const gameRes = await fetch(`${API_URL}/api/games/${gameId}`);
+        if (gameRes.ok) {
+          const gameData = await gameRes.json();
+          console.log("DB word:", gameData.targetWord, "DB round:", gameData.currentRound, "local level:", level);
+          if (gameData.targetWord && gameData.currentRound === level) {
+            setCurrentWord({
+              word: gameData.targetWord,
+              category: gameData.category,
+              length: gameData.targetWord.length,
+            });
+            setLoading(false);
+            return;
+          }
+        }
+      } catch (err) {
+        console.error("Failed to check existing word:", err);
+      }
+
+      try {
+        const res = await fetch(`${API_URL}/api/word/${randomCategory}/${randomLength}`);
+        const data = await res.json();
+        const wordObj = data[0];
+        const newWord = {
+          word: wordObj.word,
+          category: wordObj.category,
+          length: wordObj.length,
+        };
+        setCurrentWord(newWord);
+        await fetch(`${API_URL}/api/games/${gameId}/word`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(newWord),
+        });
+      } catch (err) {
+        console.error("Failed to fetch word:", err);
+      } finally {
+        setLoading(false);
+=======
       // Provar kategorier i slumpmässig ordning tills ett ord hittas för aktuellt level
       const shuffled = [...categories].sort(() => Math.random() - 0.5);
       for (const cat of shuffled) {
@@ -269,6 +351,7 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
         } catch (err) {
           console.error(`Failed to fetch word for category ${cat}:`, err);
         }
+>>>>>>> ace521cafa022639b4f81566d6647d57b6fe201e
       }
       console.error("Could not fetch a word for any category.");
       setLoading(false);
@@ -407,6 +490,22 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
               </p>
             )}
           </div>
+<<<<<<< HEAD
+          {/* THIS IS TEMPORARY FOR TESTING REMOVE BEFORE PUSH TO MAIN*/}
+          <button className="reroll-button"
+            type="button" onClick={reroll}
+          >
+            Reroll
+          </button>
+          <button className="point-button" type="button" onClick={() => {
+            const newScore = playerPoints + 10;
+            setPlayerPoints(newScore);
+            playerPointsRef.current = newScore;
+          }}
+            style={{ left: "auto", right: 100 }}>
+            +10 pts
+          </button>
+=======
           <button
             className="back-button reroll-button"
             type="button"
@@ -414,6 +513,7 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
           >
             Reroll
           </button>
+>>>>>>> ace521cafa022639b4f81566d6647d57b6fe201e
         </aside>
 
         <section className="game-center">
