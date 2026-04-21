@@ -196,24 +196,24 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
   }, [gameId, isYouPlayer1, currentWord, level]);
 
   function generateWordSlots(word: string) {
-    const letters = word.toUpperCase().split("");
-    const revealedIndexes = new Set<number>();
-    while (revealedIndexes.size < 2) {
-      revealedIndexes.add(Math.floor(Math.random() * letters.length));
-    }
-    return letters.map((letter, index) =>
-      revealedIndexes.has(index) ? letter : "",
-    );
+    return word.toUpperCase().split("").map(() => "");
   }
 
   function randomIndices(slots: string[]) {
-    const hiddenIndices = slots.map((s, i) => s === "" ? i : -1).filter(i => i !== -1);
+    const hiddenIndices = slots
+      .map((s, i) => s === "" ? i : -1)
+      .filter(i => i !== -1);
     hiddenIndices.sort(() => Math.random() - 0.5);
     return hiddenIndices.slice(0, Math.min(2, hiddenIndices.length));
   }
 
   function reroll() {
-    setDiceIndices(randomIndices(wordSlots));
+    const alreadyRevealed = new Set([...revealedIndices]);
+    const hiddenIndices = wordSlots
+      .map((s, i) => (s === "" && !alreadyRevealed.has(i) ? i : -1))
+      .filter(i => i !== -1);
+    const shuffled = [...hiddenIndices].sort(() => Math.random() - 0.5);
+    setDiceIndices(shuffled.slice(0, Math.min(2, shuffled.length)));
     setRolling(true);
     setTimeout(() => setRolling(false), 1400);
   }
@@ -453,6 +453,7 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
               word={currentWord.word.toUpperCase()}
               diceIndices={diceIndices}
               hintIndices={revealedIndices}
+              wordSlots={wordSlots}
               rolling={rolling}
             />
 
