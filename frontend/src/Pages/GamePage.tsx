@@ -24,6 +24,7 @@ type Player = {
 };
 
 export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
+  const prevWordRef = useRef<string | null>(null);
   const [showInstructions, setShowInstructions] = useState(false);
   const [players, setPlayers] = useState<Player[]>([]);
   const [timeLeft, setTimeLeft] = useState(() => {
@@ -33,7 +34,6 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
   const [waitingForOpponent, setWaitingForOpponent] = useState(() => {
     return sessionStorage.getItem(`waitingForOpponent_${playerId}`) === "true";
   });
-
   const [level, setLevel] = useState(() => {
     const saved = sessionStorage.getItem(`level_${playerId}`);
     return saved ? parseInt(saved) : 1;
@@ -44,6 +44,27 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
   const [inputValue, setInputValue] = useState("");
   const [isWrong, setIsWrong] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const [diceIndices, setDiceIndices] = useState<number[]>(() => {
+    const saved = sessionStorage.getItem(`diceIndices_${playerId}`);
+    return saved ? JSON.parse(saved) : [];
+  });
+  const [revealedIndices, setRevealedIndices] = useState<number[]>(() => {
+    const saved = sessionStorage.getItem(`revealedIndices_${playerId}`);
+    return saved ? JSON.parse(saved) : [];
+  });
+  const [currentWord, setCurrentWord] = useState<ApiWord | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [wordSlots, setWordSlots] = useState<string[]>(() => {
+    const saved = sessionStorage.getItem(`wordSlots_${playerId}`);
+    return saved ? JSON.parse(saved) : [];
+  });
+  const [rolling, setRolling] = useState(true);
+
+  const categories = [
+    "brainrot", "countries", "capitals", "sports", "animals",
+    "programming_languages", "games", "games-pc", "games-mobile",
+    "companies", "wordle", "birds", "softwares", "games-console",
+  ];
 
   async function handleConfirmWord() {
     const guess = inputValue.trim().toUpperCase();
@@ -54,7 +75,6 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
       setLevelComplete(true);
       setIsWrong(false);
       setWaitingForOpponent(true);
-
       try {
         await fetch(
           `${API_URL}/api/players/${playerId}/submit-round?newScore=${newScore}`,
@@ -64,8 +84,6 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
         console.error("Kunde inte skicka poäng", e);
       }
     } else {
-      // Wrong answer: let the player retry.
-      // Do NOT call submit-round here — it sets isRoundReady=true and ends the round.
       const newScore = Math.max(0, playerPoints - 5);
       setPlayerPoints(newScore);
       playerPointsRef.current = newScore;
@@ -77,7 +95,11 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
     sessionStorage.setItem(`timeLeft_${playerId}`, String(timeLeft));
     sessionStorage.setItem(`waitingForOpponent_${playerId}`, String(waitingForOpponent));
     sessionStorage.setItem(`level_${playerId}`, String(level));
-  }, [timeLeft, waitingForOpponent, level, playerId]);
+    sessionStorage.setItem(`diceIndices_${playerId}`, JSON.stringify(diceIndices));
+    sessionStorage.setItem(`revealedIndices_${playerId}`, JSON.stringify(revealedIndices));
+    sessionStorage.setItem(`wordSlots_${playerId}`, JSON.stringify(wordSlots));
+    sessionStorage.setItem(`currentWord_${playerId}`, currentWord?.word ?? "");
+  }, [timeLeft, waitingForOpponent, level, diceIndices, revealedIndices, wordSlots, currentWord, playerId]);
 
   useEffect(() => {
     const fetchPlayers = async () => {
@@ -126,30 +148,6 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
   const isYouPlayer1 = player1?.id === playerId;
   const isYouPlayer2 = player2?.id === playerId;
 
-  const [currentWord, setCurrentWord] = useState<ApiWord | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [wordSlots, setWordSlots] = useState<string[]>([]);
-  const [rolling, setRolling] = useState(true);
-  const [diceIndices, setDiceIndices] = useState<number[]>([]);
-  const [revealedIndices, setRevealedIndices] = useState<number[]>([]);
-
-  const categories = [
-    "brainrot",
-    "countries",
-    "capitals",
-    "sports",
-    "animals",
-    "programming_languages",
-    "games",
-    "games-pc",
-    "games-mobile",
-    "companies",
-    "wordle",
-    "birds",
-    "softwares",
-    "games-console",
-  ];
-
   useEffect(() => {
     const syncGame = async () => {
       try {
@@ -169,6 +167,10 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
             sessionStorage.removeItem(`timeLeft_${playerId}`);
             sessionStorage.removeItem(`waitingForOpponent_${playerId}`);
             sessionStorage.removeItem(`level_${playerId}`);
+            sessionStorage.removeItem(`diceIndices_${playerId}`);
+            sessionStorage.removeItem(`revealedIndices_${playerId}`);
+            sessionStorage.removeItem(`wordSlots_${playerId}`);
+            sessionStorage.removeItem(`currentWord_${playerId}`);
           }
 
           if (
@@ -231,7 +233,6 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
   useEffect(() => {
     if (!isYouPlayer1) return;
     async function loadWord() {
-      // Check if word already exists in DB for this round
       try {
         const gameRes = await fetch(`${API_URL}/api/games/${gameId}`);
         if (gameRes.ok) {
@@ -250,7 +251,6 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
         console.error("Failed to check existing word:", err);
       }
 
-      // No word yet, fetch a new one
       const shuffled = [...categories].sort(() => Math.random() - 0.5);
       for (const cat of shuffled) {
         try {
@@ -291,7 +291,6 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
 
     if (p1Ready && p2Ready && !isTransitioning) {
       if (hasWinner || isLastRound) return;
-
       setIsTransitioning(true);
       fetch(`${API_URL}/api/games/${gameId}/next-round`, { method: "POST" })
         .then(() => setTimeout(() => setIsTransitioning(false), 2000))
@@ -303,7 +302,20 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
   }, [players, isYouPlayer1, isTransitioning, gameId, level]);
 
   useEffect(() => {
-    if (currentWord) {
+    if (!currentWord) return;
+    if (currentWord.word === prevWordRef.current) return;
+    prevWordRef.current = currentWord.word;
+
+    const savedWord = sessionStorage.getItem(`currentWord_${playerId}`);
+    const savedDice = sessionStorage.getItem(`diceIndices_${playerId}`);
+    const savedSlots = sessionStorage.getItem(`wordSlots_${playerId}`);
+    const savedRevealed = sessionStorage.getItem(`revealedIndices_${playerId}`);
+
+    if (savedWord === currentWord.word && savedDice && savedSlots && JSON.parse(savedSlots).length > 0) {
+      setWordSlots(JSON.parse(savedSlots));
+      setDiceIndices(JSON.parse(savedDice));
+      setRevealedIndices(savedRevealed ? JSON.parse(savedRevealed) : []);
+    } else {
       const slots = generateWordSlots(currentWord.word);
       setWordSlots(slots);
       setDiceIndices(randomIndices(slots));
@@ -401,11 +413,20 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
               </p>
             )}
           </div>
-
-          {/* Reroll button hidden until it gets its own styling
           <button className="reroll-button" type="button" onClick={reroll}>
             Reroll
-          </button> */}
+          </button>
+          <button
+            className="point-button"
+            type="button"
+            onClick={() => {
+              const newScore = playerPoints + 10;
+              setPlayerPoints(newScore);
+              playerPointsRef.current = newScore;
+            }}
+          >
+            +10 pts
+          </button>
         </aside>
 
         <section className="game-center">
