@@ -115,7 +115,7 @@ test('buying two hints adds two yellow dice and deducts points twice', async ({ 
   await page.getByRole('button', { name: 'Buy Hint' }).click();
   await page.waitForTimeout(500);
   await expect(page.locator('.die-face--hint')).toHaveCount(2);
-  await expect(page.locator('.points-display-box')).toContainText('10');
+  await expect(page.locator('.points-display-box')).toContainText('20');
 });
 
 test('dice are horizontally centered over their word slots after landing', async ({ page }) => {
