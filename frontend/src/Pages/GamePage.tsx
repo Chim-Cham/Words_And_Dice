@@ -231,6 +231,14 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
     playerPointsRef.current = newScore;
   }
 
+  function getLevelRange(level: number): { min: number; max: number } {
+    if (level <= 5) return { min: 3, max: 4 };
+    if (level <= 10) return { min: 5, max: 5 };
+    if (level <= 15) return { min: 6, max: 6 };
+    if (level <= 20) return { min: 6, max: 7 };
+    return { min: 7, max: 12 };
+  }
+
   useEffect(() => {
     if (!isYouPlayer1) return;
     async function loadWord() {
@@ -259,6 +267,9 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
           if (!res.ok) continue;
           const data = await res.json();
           if (!data.word) continue;
+          const wordLen = data.word.length;
+          const { min, max } = getLevelRange(level);
+          if (wordLen < min || wordLen > max) continue;
           const newWord = {
             word: data.word,
             category: data.category,
