@@ -110,8 +110,10 @@ test('hint die appears above a previously empty slot', async ({ page }) => {
 test('buying two hints adds two yellow dice and deducts points twice', async ({ page }) => {
   await setupGame(page, 20);
   await page.getByRole('button', { name: 'Buy Hint' }).click();
+  await page.waitForTimeout(500);
   await expect(page.locator('.die-face--hint')).toHaveCount(1);
   await page.getByRole('button', { name: 'Buy Hint' }).click();
+  await page.waitForTimeout(500);
   await expect(page.locator('.die-face--hint')).toHaveCount(2);
   await expect(page.locator('.points-display-box')).toContainText('10');
 });
