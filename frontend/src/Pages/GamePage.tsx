@@ -199,13 +199,13 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
     return word.toUpperCase().split("").map(() => "");
   }
 
-  function randomIndices(slots: string[]) {
-    const hiddenIndices = slots
-      .map((s, i) => s === "" ? i : -1)
-      .filter(i => i !== -1);
-    hiddenIndices.sort(() => Math.random() - 0.5);
-    return hiddenIndices.slice(0, Math.min(2, hiddenIndices.length));
-  }
+  // function randomIndices(slots: string[]) {
+  //   const hiddenIndices = slots
+  //     .map((s, i) => s === "" ? i : -1)
+  //     .filter(i => i !== -1);
+  //   hiddenIndices.sort(() => Math.random() - 0.5);
+  //   return hiddenIndices.slice(0, Math.min(2, hiddenIndices.length));
+  // }
 
   function reroll() {
     const alreadyRevealed = new Set([...revealedIndices]);
