@@ -314,6 +314,7 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
   }, [players, isYouPlayer1, isTransitioning, gameId, level]);
 
   useEffect(() => {
+    console.log("currentWord effect - word:", currentWord?.word, "prev:", prevWordRef.current, "savedWord:", sessionStorage.getItem(`currentWord_${playerId}`));
     if (!currentWord) return;
     if (currentWord.word === prevWordRef.current) return;
     prevWordRef.current = currentWord.word;
@@ -323,21 +324,25 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
     const savedSlots = sessionStorage.getItem(`wordSlots_${playerId}`);
     const savedRevealed = sessionStorage.getItem(`revealedIndices_${playerId}`);
 
-    if (savedWord === currentWord.word && savedDice && savedSlots && JSON.parse(savedSlots).length > 0) {
-      setWordSlots(JSON.parse(savedSlots));
+    const parsedSlots = savedSlots ? JSON.parse(savedSlots) : [];
+    if (savedWord === currentWord.word && savedDice && parsedSlots.length === currentWord.word.length) {
+      setWordSlots(parsedSlots);
       setDiceIndices(JSON.parse(savedDice));
       setRevealedIndices(savedRevealed ? JSON.parse(savedRevealed) : []);
-    } else {
+    }
+    
+    else {
       const slots = generateWordSlots(currentWord.word);
       setWordSlots(slots);
       // Only place dice on hidden slots (not the 2 pre-revealed ones)
       const hiddenIndices = slots.map((s, i) => s === "" ? i : -1).filter(i => i !== -1);
       const shuffled = [...hiddenIndices].sort(() => Math.random() - 0.5);
       setDiceIndices(shuffled.slice(0, Math.min(2, shuffled.length)));
+      console.log("word:", currentWord.word, "diceIndices:", shuffled.slice(0, Math.min(2, shuffled.length)), "wordSlots:", slots);
       setRevealedIndices([]);
     }
   }, [currentWord]);
-
+ 
   useEffect(() => {
     const t = setTimeout(() => setRolling(false), 1400);
     return () => clearTimeout(t);
