@@ -104,6 +104,7 @@ public class GameService
         if (game != null)
         {
             game.CurrentRound += 1;
+						game.TargetWord = "";
             await _client.From<Game>().Update(game);
         }
 
