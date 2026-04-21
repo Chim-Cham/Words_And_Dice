@@ -8,8 +8,12 @@ type JoinPageProps = {
   onBack: () => void;
 };
 
-export function JoinPage({ initialGameId, initialUsername, onJoinGame, onBack }: JoinPageProps) {
-
+export function JoinPage({
+  initialGameId,
+  initialUsername,
+  onJoinGame,
+  onBack,
+}: JoinPageProps) {
   const [gameId, setGameId] = useState(initialGameId || "");
   const [username, setUsername] = useState(initialUsername || "");
 
@@ -27,7 +31,9 @@ export function JoinPage({ initialGameId, initialUsername, onJoinGame, onBack }:
   return (
     <div className="join-container">
       <h1 className="join-title">Join Game</h1>
-      <p className="tag-line">{!needsGameId ? "You're Invited to a game!" : ""}</p>
+      <p className="tag-line">
+        {!needsGameId ? "You're Invited to a game!" : ""}
+      </p>
 
       <p className="tag-line">
         {!needsGameId
@@ -37,7 +43,7 @@ export function JoinPage({ initialGameId, initialUsername, onJoinGame, onBack }:
 
       <div className="form-section-join">
         {needsGameId && (
-          <div className="input-wrapper neon-border" >
+          <div className="input-wrapper neon-border">
             <input
               type="text"
               placeholder="Enter Game ID"
@@ -60,24 +66,21 @@ export function JoinPage({ initialGameId, initialUsername, onJoinGame, onBack }:
           </div>
         )}
 
-
-
         <div className="button-group">
           <div className="button-group">
-            <button className="btn joining" type="button" onClick={handleJoinClick}>
+            <button
+              className="btn joining"
+              type="button"
+              onClick={handleJoinClick}
+            >
               {!needsGameId ? "Start Playing" : "Join Game"}
             </button>
-            <button
-              className="btn back"
-              type="button"
-              onClick={onBack}
-            >
+            <button className="btn back" type="button" onClick={onBack}>
               Back
             </button>
           </div>
-
         </div>
-      </div >
-    </div >
+      </div>
+    </div>
   );
 }

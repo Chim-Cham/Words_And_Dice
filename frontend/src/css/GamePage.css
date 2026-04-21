@@ -136,12 +136,21 @@ body {
 }
 
 .category-box,
+.timer-box,
 .status-box {
   padding: 12px 18px;
   border-radius: 14px;
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.12);
-  font-weight: 600;
+  font-weight: bold;
+}
+
+.timer-box {
+  font-size: 1.2rem;
+}
+
+.timer-box--urgent {
+  color: red;
 }
 
 .timer-box {
@@ -449,6 +458,35 @@ body {
   display: flex;
   justify-content: center;
   gap: 25px;
+}
+
+.loading-small-text {
+  font-size: 12px;
+}
+
+.reroll-button {
+  left: auto;
+  right: 20px;
+}
+
+.level-complete-panel {
+  margin-top: 15px;
+}
+
+.game-over-content {
+  text-align: center;
+}
+
+.game-over-title {
+  color: #ffd700;
+  margin-bottom: 10px;
+  font-size: 2rem;
+}
+
+.game-over-winner {
+  font-size: 1.5rem;
+  margin-bottom: 20px;
+  color: white;
 }
 
 .loader-dice {

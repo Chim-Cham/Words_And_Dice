@@ -50,5 +50,5 @@ test('User can join a game via invite link', async ({ page }) => {
   await page.getByPlaceholder('Choose your Username').fill('PlaywrightJoiner');
   await page.getByRole('button', { name: 'Start Playing' }).click();
 
-  await expect(page.getByRole('heading', { name: /Player 2/i })).toBeVisible();
+  await expect(page.getByText('Level 1 / 25')).toBeVisible({ timeout: 10000 });
 });

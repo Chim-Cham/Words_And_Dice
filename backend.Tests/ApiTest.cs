@@ -2,7 +2,6 @@ using Xunit;
 namespace backend.Tests;
 
 using System.Text.Json;
-using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc.Testing;
 using System.Net.Http;
 
@@ -16,26 +15,41 @@ public class ApiTest : IClassFixture<WebApplicationFactory<Program>>
     }
 
     [Fact]
-    public async Task wordFetch()
+    public async Task WordFetch_AnimalsLevel1_ReturnsWord()
     {
-        //using var fetch = new HttpClient();
+        // Testar nya endpoint-formatet: /api/word/{category}/level/{level}
+        var response = await _client.GetAsync("/api/word/animals/level/1");
 
-        // Fetch from API
-        // var response = await fetch.GetAsync("https://random-words-api.kushcreates.com/api?language=en&category=animals&length=5");
-        // var response = await fetch.GetAsync("http://localhost:5164/api/word/animals/5");
-        var response = await _client.GetAsync("/api/word/animals/5");
-
-        // Check fetch was succesful
         response.EnsureSuccessStatusCode();
 
-        // Converts the fetched Json data into a string format
         var content = await response.Content.ReadAsStringAsync();
-        // var words = JsonSerializer.Deserialize<string>(content);
 
-        System.Console.WriteLine(content);
-
-        // Checks if the fetch was not null or empty
         Assert.NotNull(content);
         Assert.NotEmpty(content);
+    }
+
+    [Fact]
+    public async Task WordFetch_InvalidCategory_Returns400()
+    {
+        // Testar att ogiltig kategori ger 400
+        var response = await _client.GetAsync("/api/word/fakecategory/level/1");
+
+        Assert.Equal(System.Net.HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task WordFetch_Categories_ReturnsAllCategories()
+    {
+        // Testar att /api/word/categories returnerar en lista
+        var response = await _client.GetAsync("/api/word/categories");
+
+        response.EnsureSuccessStatusCode();
+
+        var content = await response.Content.ReadAsStringAsync();
+        var categories = JsonSerializer.Deserialize<List<string>>(content);
+
+        Assert.NotNull(categories);
+        Assert.Contains("animals", categories);
+        Assert.Contains("brainrot", categories);
     }
 }

@@ -1,15 +1,60 @@
 import { expect, Page } from "@playwright/test";
 
 export class GamePage {
-  constructor(private page: Page) { }
+  constructor(private page: Page) {}
 
   async open() {
     // Sätt fasta ID:n så att appen vet exakt vem som är vem
     const MOCK_GAME_ID = "test-game-id";
     const MOCK_PLAYER_ID = "player-1";
 
-    // 1. Mocka: Skapa spelet ("Host Game" klicket)
-    // Fångar anrop till /api/games oavsett query-parametrar
+    await this.page.route("**/api/games/*/players", async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify([
+          {
+            id: MOCK_PLAYER_ID,
+            playerName: "PlaywrightUser",
+            score: 0,
+            isRoundReady: false,
+          },
+          {
+            id: "player-2",
+            playerName: "Spelare2",
+            score: 0,
+            isRoundReady: false,
+          },
+        ]),
+      });
+    });
+
+    // 2. Mocka: Spara ordet till backenden - måste vara före games**
+    await this.page.route("**/api/games/*/word", async (route) => {
+      await route.fulfill({ status: 200, body: "OK" });
+    });
+
+    // 3. Mocka: Polling på spelet
+    await this.page.route(`**/api/games/${MOCK_GAME_ID}`, async (route) => {
+      if (route.request().method() === "GET") {
+        await route.fulfill({
+          status: 200,
+          contentType: "application/json",
+          body: JSON.stringify({
+            id: MOCK_GAME_ID,
+            status: "playing",
+            targetWord: "CAT",
+            category: "animals",
+            winningScore: 100,
+            currentRound: 1,
+          }),
+        });
+      } else {
+        await route.fallback();
+      }
+    });
+
+    // 4. Mocka: Skapa spelet (Host Game)
     await this.page.route("**/api/games**", async (route) => {
       if (route.request().method() === "POST") {
         await route.fulfill({
@@ -21,65 +66,28 @@ export class GamePage {
             targetWord: "",
             winningScore: 100,
             currentRound: 1,
-            playerId: MOCK_PLAYER_ID // Matchar spelarlistan nedan!
           }),
         });
       } else {
-        await route.continue();
+        await route.fallback();
       }
     });
 
-    // 2. Mocka: Hämta spelarlistan (så hasLoadedPlayers blir sant)
-    await this.page.route("**/api/games/*/players", async (route) => {
+    // 5. Mocka: Hämta ord baserat på level
+    await this.page.route("**/api/word/**", async (route) => {
       await route.fulfill({
         status: 200,
         contentType: "application/json",
-        body: JSON.stringify([
-          { id: MOCK_PLAYER_ID, playerName: "PlaywrightUser", score: 0 },
-          { id: "player-2", playerName: "Spelare2", score: 0 } // Bra för UI-testerna att ha en Player 2!
-        ]),
+        body: JSON.stringify({ word: "cat", category: "animals" }),
       });
     });
 
-    // 3. Mocka: Hämta ett slumpmässigt ord
-    await this.page.route("**/api/word/*/*", async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: "application/json",
-        body: JSON.stringify([{ word: "CAT", category: "Animals", length: 3 }]),
-      });
-    });
-
-    // 4. Mocka: Spara ordet till backenden
-    await this.page.route("**/api/games/*/word", async (route) => {
-      await route.fulfill({ status: 200, body: "OK" });
-    });
-
-    // 5. Mocka: Pollingen (GET på själva spelet, fångar upp ifall React fastnar)
-    await this.page.route(`**/api/games/${MOCK_GAME_ID}`, async (route) => {
-      if (route.request().method() === "GET") {
-        await route.fulfill({
-          status: 200,
-          contentType: "application/json",
-          body: JSON.stringify({
-            id: MOCK_GAME_ID,
-            status: "playing",
-            targetWord: "CAT",
-            category: "Animals",
-            winningScore: 100,
-            currentRound: 1
-          })
-        });
-      } else {
-        await route.continue();
-      }
-    });
-
+    // 6. Mocka: Submit round
     await this.page.route("**/api/players/*/submit-round**", async (route) => {
       await route.fulfill({
         status: 200,
         contentType: "application/json",
-        body: JSON.stringify({ message: "Score updated" })
+        body: JSON.stringify({ message: "Score updated" }),
       });
     });
 
@@ -89,7 +97,9 @@ export class GamePage {
     await this.page.getByRole("button", { name: "Host Game" }).click();
 
     // Nu kan vi vänta på kategoriboxen, alla nätverksanrop kommer besvaras direkt!
-    await this.page.locator(".category-box").waitFor({ state: "visible", timeout: 15000 });
+    await this.page
+      .locator(".category-box")
+      .waitFor({ state: "visible", timeout: 15000 });
   }
 
   async expectLevelVisible() {
@@ -98,15 +108,14 @@ export class GamePage {
   }
 
   async expectPlayer1HeadingVisible() {
-    // Matchar "Player 1" oavsett om det står "(You)" efteråt
     await expect(
-      this.page.getByRole("heading", { name: /Player 1/i }),
+      this.page.getByRole("heading", { name: /PlaywrightUser/i }),
     ).toBeVisible();
   }
 
   async expectPlayer2HeadingVisible() {
     await expect(
-      this.page.getByRole("heading", { name: /Player 2/i }),
+      this.page.getByRole("heading", { name: /Spelare2/i }),
     ).toBeVisible();
   }
 
@@ -130,7 +139,9 @@ export class GamePage {
 
   async expectTextVisible(text: string) {
     // exact: false är viktigt här för att hantera dolda radbrytningar eller punkter
-    await expect(this.page.getByText(text, { exact: false }).first()).toBeVisible({ timeout: 10000 });
+    await expect(
+      this.page.getByText(text, { exact: false }).first(),
+    ).toBeVisible({ timeout: 10000 });
   }
 
   async expectPointsVisible(pointsText: string) {
