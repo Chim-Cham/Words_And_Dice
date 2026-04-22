@@ -88,6 +88,21 @@ public class GameService
         return updateResponse.Models.First();
     }
 
+    public async Task MarkPlayerReady(string gameId, string playerId)
+    {
+        var playerResponse = await _client
+        .From<Player>()
+        .Where(p => p.Id == playerId)
+        .Get();
+
+        var player = playerResponse.Models?.FirstOrDefault();
+        if (player == null)
+            throw new Exception("Spelaren hittades inte.");
+
+        player.IsRoundReady = true;
+        await _client.From<Player>().Update(player);
+    }
+
     public async Task StartNextRound(string gameId)
     {
         var players = await GetPlayersInGame(gameId);
@@ -104,7 +119,7 @@ public class GameService
         if (game != null)
         {
             game.CurrentRound += 1;
-						game.TargetWord = "";
+            game.TargetWord = "";
             await _client.From<Game>().Update(game);
         }
 
@@ -161,20 +176,45 @@ public class GameService
         if (player == null)
             throw new Exception("Spelaren hittades inte.");
 
+        if (player.LastGuess == guess)
+        {
+            return new GuessResult
+            {
+                Correct = false,
+                ScoreChange = 0,
+                NewScore = player.Score
+            };
+        }
+
+        if (string.IsNullOrWhiteSpace(guess))
+        {
+            return new GuessResult
+            {
+                Correct = false,
+                ScoreChange = 0,
+                NewScore = player.Score
+            };
+        }
+
         // jämför gissning
         bool correct = guess.ToUpper() == game.TargetWord.ToUpper();
-        int scoreChange = correct ? +5 : -5;
 
-        // uppdaterar resultat
-        player.Score += scoreChange;
+        if (correct)
+        {
+            player.Score += 5;
+        }
+        else
+        {
+            player.Score = Math.Max(0, player.Score - 5);
+        }
+
         player.LastGuess = guess;
         await _client.From<Player>().Update(player);
 
-        // returnerar resultat
         return new GuessResult
         {
             Correct = correct,
-            ScoreChange = scoreChange,
+            ScoreChange = correct ? +5 : -5,
             NewScore = player.Score
         };
     }

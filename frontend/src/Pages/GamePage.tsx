@@ -68,13 +68,19 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
 
   async function handleConfirmWord() {
     const guess = inputValue.trim().toUpperCase();
+    if (guess.length === 0) {
+      return;
+    }
+
     if (currentWord && guess === currentWord.word.toUpperCase()) {
       const newScore = playerPoints + 5;
       setPlayerPoints(newScore);
       playerPointsRef.current = newScore;
       setLevelComplete(true);
       setIsWrong(false);
-      setWaitingForOpponent(true);
+      setTimeout(() => {
+        setWaitingForOpponent(true);
+      }, 1000);
       try {
         await fetch(
           `${API_URL}/api/players/${playerId}/submit-round?newScore=${newScore}`,
@@ -108,10 +114,10 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
         if (response.ok) {
           const data = await response.json();
           setPlayers(data);
+
           const me = data.find((p: Player) => p.id === playerId);
-          if (me && !waitingForOpponent && me.score > playerPointsRef.current) {
+          if (me) {
             setPlayerPoints(me.score);
-            playerPointsRef.current = me.score;
           }
         }
       } catch (err) {
@@ -217,11 +223,12 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
       .map((_, i) => i)
       .filter((i) => !alreadyRevealed.has(i));
     if (hidden.length === 0) return;
+
     const pick = hidden[Math.floor(Math.random() * hidden.length)];
     setRevealedIndices((prev) => [...prev, pick]);
-    const newScore = playerPoints - currentWord!.length;
-    setPlayerPoints(newScore);
-    playerPointsRef.current = newScore;
+
+    setPlayerPoints(prev => prev - currentWord!.length);
+    playerPointsRef.current = playerPointsRef.current - currentWord!.length;
   }
 
   function getLevelRange(level: number): { min: number; max: number; } {
@@ -496,8 +503,7 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
               onKeyDown={(e) => {
                 if (
                   e.key === "Enter" &&
-                  !waitingForOpponent &&
-                  inputValue.trim() !== ""
+                  !waitingForOpponent
                 ) {
                   handleConfirmWord();
                 }
@@ -518,7 +524,7 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
               className="primary-button"
               type="button"
               onClick={handleConfirmWord}
-              disabled={waitingForOpponent || inputValue.trim() === ""}
+              disabled={waitingForOpponent}
             >
               Confirm Word
             </button>

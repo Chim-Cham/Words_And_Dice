@@ -42,10 +42,27 @@ public static class RoundApi
 
         app.MapPost("/api/games/{gameId}/guess", async (string gameId, GuessRequest req, GameService gameService) =>
         {
+            if (string.IsNullOrWhiteSpace(req.Guess))
+            {
+                return Results.BadRequest(new { error = "Guess cannot be empty." });
+            }
             try
             {
                 var result = await gameService.SubmitGuess(gameId, req.PlayerId, req.Guess);
                 return Results.Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return Results.BadRequest(new { error = ex.Message });
+            }
+        });
+
+        app.MapPost("/api/games/{gameId}/ready/{playerId}", async (string gameId, string playerId, GameService gameService) =>
+        {
+            try
+            {
+                await gameService.MarkPlayerReady(gameId, playerId);
+                return Results.Ok(new { message = "Player marked as ready." });
             }
             catch (Exception ex)
             {
