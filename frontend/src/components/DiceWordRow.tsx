@@ -56,8 +56,6 @@ export function DiceWordRow({ word, diceIndices, hintIndices = [], wordSlots, ro
         const isPreRevealed = wordSlots[i] !== "";
         const hasDie = diceIndices.includes(i) || hintIndices.includes(i);
         const isHint = hintIndices.includes(i);
-        //remove befoere main push
-        console.log("rendering - diceIndices:", diceIndices, "hintIndices:", hintIndices, "wordSlots:", wordSlots);
         return (
           <DieSlot
             key={`${i}-${isHint ? 'hint' : hasDie ? 'die' : 'empty'}`}

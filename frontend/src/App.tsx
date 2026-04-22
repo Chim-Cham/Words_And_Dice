@@ -14,7 +14,7 @@ function App() {
   const [playerId, setPlayerId] = useState(() => sessionStorage.getItem("playerId") || "");
   const [username, setUsername] = useState(() => sessionStorage.getItem("username") || "");
 
-  console.log(import.meta.env.VITE_API_URL, API_URL);
+ 
 
   useEffect(() => {
     sessionStorage.setItem("page", page);
@@ -145,7 +145,7 @@ function App() {
       />
     );
   }
-  console.log("Current Player ID:", playerId);
+
   return <StartPage onStartGame={handleStartGame} onGoToJoin={handleGoToJoin} />;
 }
 

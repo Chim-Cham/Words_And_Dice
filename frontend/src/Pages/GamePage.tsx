@@ -315,8 +315,6 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
   }, [players, isYouPlayer1, isTransitioning, gameId, level]);
 
   useEffect(() => {
-    //remove before main push
-    console.log("currentWord effect - word:", currentWord?.word, "prev:", prevWordRef.current, "savedWord:", sessionStorage.getItem(`currentWord_${playerId}`));
     if (!currentWord) return;
     if (currentWord.word === prevWordRef.current) return;
     prevWordRef.current = currentWord.word;
@@ -434,11 +432,10 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
               </p>
             )}
           </div>
-          {/*remove before main push*/}
+          {/*
           <button className="reroll-button" type="button" onClick={reroll}>
             Reroll
           </button>
-          {/*remove before main push*/}
           <button
             className="point-button"
             type="button"
@@ -449,7 +446,7 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
             }}
           >
             +10 pts
-          </button>
+          </button>*/}
         </aside>
 
         <section className="game-center">
