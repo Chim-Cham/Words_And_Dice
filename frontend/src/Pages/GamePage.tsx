@@ -24,6 +24,7 @@ type Player = {
 };
 
 export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
+  const HINT_COST = 3;
   const hasInitializedPoints = useRef(false);
   const prevWordRef = useRef<string | null>(null);
   const [showInstructions, setShowInstructions] = useState(false);
@@ -146,6 +147,9 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
 
   useEffect(() => {
     if (timeLeft === 0 && !waitingForOpponent) {
+      const newScore = levelComplete ? playerPoints : playerPoints - 5;
+      setPlayerPoints(newScore);
+      playerPointsRef.current = newScore;
       setWaitingForOpponent(true);
       fetch(
         `${API_URL}/api/players/${playerId}/submit-round?newScore=${playerPoints}`,
@@ -234,8 +238,8 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
     const pick = hidden[Math.floor(Math.random() * hidden.length)];
     setRevealedIndices((prev) => [...prev, pick]);
 
-    setPlayerPoints(prev => prev - currentWord!.length);
-    playerPointsRef.current = playerPointsRef.current - currentWord!.length;
+    setPlayerPoints(prev => prev - HINT_COST);
+    playerPointsRef.current = playerPointsRef.current - HINT_COST;
   }
 
   function getLevelRange(level: number): { min: number; max: number; } {
@@ -373,11 +377,10 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
     );
   }
 
-  const wordLength = currentWord.length;
   const category = currentWord.category;
   const isPlayerTurn = true;
   const maxScore = 5;
-  const canUseHint = playerPoints >= wordLength;
+  const canUseHint = playerPoints >= HINT_COST;
 
   const bothReady = player1?.isRoundReady && player2?.isRoundReady;
   const isGameOver =
@@ -424,7 +427,7 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
 
           <div className="info-card hint-card">
             <h3>Hint</h3>
-            <p>Hint cost: {wordLength} points</p>
+            <p>Hint cost: {HINT_COST} points</p>
             <button
               className="secondary-button"
               type="button"
