@@ -116,7 +116,7 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
           setPlayers(data);
 
           const me = data.find((p: Player) => p.id === playerId);
-          if (me) {
+          if (me && me.score === playerPointsRef.current) {
             setPlayerPoints(me.score);
           }
         }
@@ -532,14 +532,14 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
                   <>
                     {levelComplete ? (
                       <p className="correct-answer-text">Correct! +5 points</p>
-                    ) : (
+                    ) : timeLeft === 0 ? (
                       <>
                         <p className="wrong-answer-text">Time is up!</p>
                         <p className="revealed-word-text">
                           The word was: <strong>{currentWord?.word.toUpperCase()}</strong>
                         </p>
                       </>
-                    )}
+                    ) : null}
                     <p>Waiting for Player {isYouPlayer1 ? "2" : "1"}...</p>
                   </>
                 ) : (
