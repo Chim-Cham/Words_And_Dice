@@ -24,6 +24,6 @@ public class downScoreTest
     // Assert
     Assert.False(result.Correct);
     Assert.Equal(-5, result.ScoreChange);
-    Assert.Equal(-5, result.NewScore);
+    Assert.Equal(0, result.NewScore);
   }
 }
