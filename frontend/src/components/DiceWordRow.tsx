@@ -7,11 +7,13 @@ type Props = {
   word: string;
   diceIndices: number[];
   hintIndices?: number[];
+  wordSlots: string[];
   rolling: boolean;
-
 };
 
-function DieSlot({ letter, rolling, hasDie, isHint }: { letter: string; rolling: boolean; hasDie: boolean; isHint: boolean }) {
+function DieSlot({ letter, rolling, hasDie, isHint, isPreRevealed }: {
+  letter: string; rolling: boolean; hasDie: boolean; isHint: boolean; isPreRevealed: boolean
+}) {
   const [display, setDisplay] = useState("?");
   const [phase, setPhase] = useState<"rolling" | "idle" | "sliding" | "settled">("rolling");
 
@@ -33,9 +35,9 @@ function DieSlot({ letter, rolling, hasDie, isHint }: { letter: string; rolling:
 
   return (
     <div className="dice-slot-col">
-      <div className={`word-slot ${hasDie ? "word-slot--revealed" : "word-slot--empty"}`}>
+      <div className={`word-slot ${hasDie || isPreRevealed ? "word-slot--revealed" : "word-slot--empty"}`}>
+        {isPreRevealed && !hasDie && <span>{letter}</span>}
       </div>
-
       {hasDie && (
         <div className={`die-face die-face--${phase}${isHint ? " die-face--hint" : ""}`}>
           {display}
@@ -45,20 +47,28 @@ function DieSlot({ letter, rolling, hasDie, isHint }: { letter: string; rolling:
   );
 }
 
-export function DiceWordRow({ word, diceIndices, hintIndices = [], rolling }: Props) {
+export function DiceWordRow({ word, diceIndices, hintIndices = [], wordSlots, rolling }: Props) {
   const letters = word.toUpperCase().split("");
 
   return (
     <div className="dice-word-row">
-      {letters.map((letter, i) => (
-        <DieSlot
-          key={`${i}-${hintIndices.includes(i) ? 'hint' : 'die'}`}
-          letter={letter}
-          rolling={rolling}
-          hasDie={diceIndices.includes(i) || hintIndices.includes(i)}
-          isHint={hintIndices.includes(i)}
-        />
-      ))}
+      {letters.map((letter, i) => {
+        const isPreRevealed = wordSlots[i] !== "";
+        const hasDie = diceIndices.includes(i) || hintIndices.includes(i);
+        const isHint = hintIndices.includes(i);
+        //remove befoere main push
+        console.log("rendering - diceIndices:", diceIndices, "hintIndices:", hintIndices, "wordSlots:", wordSlots);
+        return (
+          <DieSlot
+            key={`${i}-${isHint ? 'hint' : hasDie ? 'die' : 'empty'}`}
+            letter={letter}
+            rolling={rolling}
+            hasDie={hasDie}
+            isHint={isHint}
+            isPreRevealed={isPreRevealed}
+          />
+        );
+      })}
     </div>
   );
 }

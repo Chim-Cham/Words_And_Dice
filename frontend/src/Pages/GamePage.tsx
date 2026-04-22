@@ -63,7 +63,7 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
   const categories = [
     "brainrot", "countries", "capitals", "sports", "animals",
     "programming_languages", "games", "games-pc", "games-mobile",
-    "companies", "wordle", "birds", "softwares", "games-console",
+    "companies", "birds", "softwares", "games-console",
   ];
 
   async function sendReady() {
@@ -132,7 +132,7 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
     fetchPlayers();
     const interval = setInterval(fetchPlayers, 1000);
     return () => clearInterval(interval);
-  }, [gameId]);
+  }, [gameId, waitingForOpponent]);
 
   useEffect(() => {
     if (timeLeft <= 0 || waitingForOpponent) return;
@@ -174,6 +174,7 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
             setTimeLeft(45);
             setIsWrong(false);
             setLoading(true);
+            setRevealedIndices([]);
             setCurrentWord(null);
             sessionStorage.removeItem(`timeLeft_${playerId}`);
             sessionStorage.removeItem(`waitingForOpponent_${playerId}`);
@@ -182,6 +183,7 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
             sessionStorage.removeItem(`revealedIndices_${playerId}`);
             sessionStorage.removeItem(`wordSlots_${playerId}`);
             sessionStorage.removeItem(`currentWord_${playerId}`);
+            sessionStorage.setItem(`roundReset_${playerId}`, "true");
           }
 
           if (
@@ -206,24 +208,16 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
   }, [gameId, isYouPlayer1, currentWord, level]);
 
   function generateWordSlots(word: string) {
-    const letters = word.toUpperCase().split("");
-    const revealedIndexes = new Set<number>();
-    while (revealedIndexes.size < 2) {
-      revealedIndexes.add(Math.floor(Math.random() * letters.length));
-    }
-    return letters.map((letter, index) =>
-      revealedIndexes.has(index) ? letter : "",
-    );
-  }
-
-  function randomIndices(slots: string[]) {
-    const indices = slots.map((_, i) => i);
-    indices.sort(() => Math.random() - 0.5);
-    return indices.slice(0, 2);
+    return word.toUpperCase().split("").map(() => "");
   }
 
   function reroll() {
-    setDiceIndices(randomIndices(wordSlots));
+    const alreadyRevealed = new Set([...revealedIndices]);
+    const hiddenIndices = wordSlots
+      .map((s, i) => (s === "" && !alreadyRevealed.has(i) ? i : -1))
+      .filter(i => i !== -1);
+    const shuffled = [...hiddenIndices].sort(() => Math.random() - 0.5);
+    setDiceIndices(shuffled.slice(0, Math.min(2, shuffled.length)));
     setRolling(true);
     setTimeout(() => setRolling(false), 1400);
   }
@@ -241,6 +235,14 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
     playerPointsRef.current = newScore;
   }
 
+  function getLevelRange(level: number): { min: number; max: number } {
+    if (level <= 5) return { min: 3, max: 4 };
+    if (level <= 10) return { min: 5, max: 5 };
+    if (level <= 15) return { min: 6, max: 6 };
+    if (level <= 20) return { min: 6, max: 7 };
+    return { min: 7, max: 12 };
+  }
+
   useEffect(() => {
     if (!isYouPlayer1) return;
     async function loadWord() {
@@ -249,6 +251,7 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
         if (gameRes.ok) {
           const gameData = await gameRes.json();
           if (gameData.targetWord && gameData.currentRound === level) {
+            setRevealedIndices([]);
             setCurrentWord({
               word: gameData.targetWord,
               category: gameData.category,
@@ -269,6 +272,9 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
           if (!res.ok) continue;
           const data = await res.json();
           if (!data.word) continue;
+          const wordLen = data.word.length;
+          const { min, max } = getLevelRange(level);
+          if (wordLen < min || wordLen > max) continue;
           const newWord = {
             word: data.word,
             category: data.category,
@@ -313,6 +319,8 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
   }, [players, isYouPlayer1, isTransitioning, gameId, level]);
 
   useEffect(() => {
+    //remove before main push
+    console.log("currentWord effect - word:", currentWord?.word, "prev:", prevWordRef.current, "savedWord:", sessionStorage.getItem(`currentWord_${playerId}`));
     if (!currentWord) return;
     if (currentWord.word === prevWordRef.current) return;
     prevWordRef.current = currentWord.word;
@@ -322,14 +330,20 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
     const savedSlots = sessionStorage.getItem(`wordSlots_${playerId}`);
     const savedRevealed = sessionStorage.getItem(`revealedIndices_${playerId}`);
 
-    if (savedWord === currentWord.word && savedDice && savedSlots && JSON.parse(savedSlots).length > 0) {
-      setWordSlots(JSON.parse(savedSlots));
+    const parsedSlots = savedSlots ? JSON.parse(savedSlots) : [];
+    const wasReset = sessionStorage.getItem(`roundReset_${playerId}`) === "true";
+    if (savedWord === currentWord.word && savedDice && parsedSlots.length === currentWord.word.length && !wasReset) {
+      setWordSlots(parsedSlots);
       setDiceIndices(JSON.parse(savedDice));
       setRevealedIndices(savedRevealed ? JSON.parse(savedRevealed) : []);
-    } else {
+    }
+    else {
+      sessionStorage.removeItem(`roundReset_${playerId}`);
       const slots = generateWordSlots(currentWord.word);
       setWordSlots(slots);
-      setDiceIndices(randomIndices(slots));
+      const hiddenIndices = slots.map((s, i) => s === "" ? i : -1).filter(i => i !== -1);
+      const shuffled = [...hiddenIndices].sort(() => Math.random() - 0.5);
+      setDiceIndices(shuffled.slice(0, Math.min(2, shuffled.length)));
       setRevealedIndices([]);
     }
   }, [currentWord]);
@@ -424,9 +438,11 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
               </p>
             )}
           </div>
+          {/*remove before main push*/}
           <button className="reroll-button" type="button" onClick={reroll}>
             Reroll
           </button>
+          {/*remove before main push*/}
           <button
             className="point-button"
             type="button"
@@ -460,6 +476,7 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
               word={currentWord.word.toUpperCase()}
               diceIndices={diceIndices}
               hintIndices={revealedIndices}
+              wordSlots={wordSlots}
               rolling={rolling}
             />
 

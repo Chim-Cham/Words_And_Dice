@@ -20,7 +20,7 @@ public static class WordAPI
     // Alla kategorier som externa API:et stöder
     public static readonly List<string> SupportedCategories = new()
     {
-        "wordle", "brainrot", "countries", "capitals", "sports",
+        "brainrot", "countries", "capitals", "sports",
         "animals", "birds", "softwares", "programming_languages",
         "games", "games-pc", "games-mobile", "games-console", "companies"
     };
