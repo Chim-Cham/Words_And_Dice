@@ -88,6 +88,21 @@ public class GameService
         return updateResponse.Models.First();
     }
 
+    public async Task MarkPlayerReady(string gameId, string playerId)
+    {
+        var playerResponse = await _client
+        .From<Player>()
+        .Where(p => p.Id == playerId)
+        .Get();
+
+        var player = playerResponse.Models?.FirstOrDefault();
+        if (player == null)
+            throw new Exception("Spelaren hittades inte.");
+
+        player.IsRoundReady = true;
+        await _client.From<Player>().Update(player);
+    }
+
     public async Task StartNextRound(string gameId)
     {
         var players = await GetPlayersInGame(gameId);
@@ -160,6 +175,16 @@ public class GameService
         var player = playerResponse.Models?.FirstOrDefault();
         if (player == null)
             throw new Exception("Spelaren hittades inte.");
+
+        if (player.LastGuess == guess)
+        {
+            return new GuessResult
+            {
+                Correct = false,
+                ScoreChange = 0,
+                NewScore = player.Score
+            };
+        }
 
         // jämför gissning
         bool correct = guess.ToUpper() == game.TargetWord.ToUpper();
