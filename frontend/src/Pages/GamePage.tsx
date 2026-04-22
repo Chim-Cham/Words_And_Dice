@@ -66,8 +66,24 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
     "companies", "wordle", "birds", "softwares", "games-console",
   ];
 
+  async function sendReady() {
+    try {
+      await fetch(`${API_URL}/api/games/${gameId}/ready/${playerId}`, {
+        method: "POST",
+      });
+    } catch (err) {
+      console.error("Kunde inte markera redo:", err);
+    }
+  }
+
   async function handleConfirmWord() {
     const guess = inputValue.trim().toUpperCase();
+    if (guess.length === 0) {
+      setWaitingForOpponent(true);
+      await sendReady();
+      return;
+    }
+
     if (currentWord && guess === currentWord.word.toUpperCase()) {
       const newScore = playerPoints + 5;
       setPlayerPoints(newScore);
@@ -108,11 +124,6 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
         if (response.ok) {
           const data = await response.json();
           setPlayers(data);
-          const me = data.find((p: Player) => p.id === playerId);
-          if (me && playerPointsRef.current === 0 && me.score > 0) {
-            setPlayerPoints(me.score);
-            playerPointsRef.current = me.score;
-          }
         }
       } catch (err) {
         console.error("Kunde inte hämta spelare:", err);
@@ -479,8 +490,7 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
               onKeyDown={(e) => {
                 if (
                   e.key === "Enter" &&
-                  !waitingForOpponent &&
-                  inputValue.trim() !== ""
+                  !waitingForOpponent
                 ) {
                   handleConfirmWord();
                 }
@@ -501,7 +511,7 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
               className="primary-button"
               type="button"
               onClick={handleConfirmWord}
-              disabled={waitingForOpponent || inputValue.trim() === ""}
+              disabled={waitingForOpponent}
             >
               Confirm Word
             </button>

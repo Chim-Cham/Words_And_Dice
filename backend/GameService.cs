@@ -186,20 +186,35 @@ public class GameService
             };
         }
 
+        if (string.IsNullOrWhiteSpace(guess))
+        {
+            return new GuessResult
+            {
+                Correct = false,
+                ScoreChange = 0,
+                NewScore = player.Score
+            };
+        }
+
         // jämför gissning
         bool correct = guess.ToUpper() == game.TargetWord.ToUpper();
-        int scoreChange = correct ? +5 : -5;
 
-        // uppdaterar resultat
-        player.Score += scoreChange;
+        if (correct)
+        {
+            player.Score += 5;
+        }
+        else
+        {
+            player.Score = Math.Max(0, player.Score - 5);
+        }
+
         player.LastGuess = guess;
         await _client.From<Player>().Update(player);
 
-        // returnerar resultat
         return new GuessResult
         {
             Correct = correct,
-            ScoreChange = scoreChange,
+            ScoreChange = correct ? +5 : -5,
             NewScore = player.Score
         };
     }
