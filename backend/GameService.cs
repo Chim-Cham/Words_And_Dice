@@ -161,16 +161,6 @@ public class GameService
         if (player == null)
             throw new Exception("Spelaren hittades inte.");
 
-        if (player.LastGuess == guess)
-        {
-            return new GuessResult
-            {
-                Correct = false,
-                ScoreChange = 0,
-                NewScore = player.Score
-            };
-        }
-
         // jämför gissning
         bool correct = guess.ToUpper() == game.TargetWord.ToUpper();
         int scoreChange = correct ? +5 : -5;
