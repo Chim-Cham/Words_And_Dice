@@ -104,7 +104,7 @@ public class GameService
         if (game != null)
         {
             game.CurrentRound += 1;
-						game.TargetWord = "";
+            game.TargetWord = "";
             await _client.From<Game>().Update(game);
         }
 
@@ -160,6 +160,16 @@ public class GameService
         var player = playerResponse.Models?.FirstOrDefault();
         if (player == null)
             throw new Exception("Spelaren hittades inte.");
+
+        if (player.LastGuess == guess)
+        {
+            return new GuessResult
+            {
+                Correct = false,
+                ScoreChange = 0,
+                NewScore = player.Score
+            };
+        }
 
         // jämför gissning
         bool correct = guess.ToUpper() == game.TargetWord.ToUpper();
