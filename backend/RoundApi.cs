@@ -52,5 +52,18 @@ public static class RoundApi
                 return Results.BadRequest(new { error = ex.Message });
             }
         });
+
+        app.MapPost("/api/games/{gameId}/ready/{playerId}", async (string gameId, string playerId, GameService gameService) =>
+        {
+            try
+            {
+                await gameService.MarkPlayerReady(gameId, playerId);
+                return Results.Ok(new { message = "Player marked as ready." });
+            }
+            catch (Exception ex)
+            {
+                return Results.BadRequest(new { error = ex.Message });
+            }
+        });
     }
 }
