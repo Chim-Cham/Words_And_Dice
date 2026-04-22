@@ -224,7 +224,7 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
     playerPointsRef.current = newScore;
   }
 
-  function getLevelRange(level: number): { min: number; max: number } {
+  function getLevelRange(level: number): { min: number; max: number; } {
     if (level <= 5) return { min: 3, max: 4 };
     if (level <= 10) return { min: 5, max: 5 };
     if (level <= 15) return { min: 6, max: 6 };
@@ -336,7 +336,7 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
       setRevealedIndices([]);
     }
   }, [currentWord]);
- 
+
   useEffect(() => {
     const t = setTimeout(() => setRolling(false), 1400);
     return () => clearTimeout(t);
@@ -530,7 +530,12 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
                     {levelComplete ? (
                       <p className="correct-answer-text">Correct! +5 points</p>
                     ) : (
-                      <p className="wrong-answer-text">Time is up!</p>
+                      <>
+                        <p className="wrong-answer-text">Time is up!</p>
+                        <p className="revealed-word-text">
+                          The word was: <strong>{currentWord?.word.toUpperCase()}</strong>
+                        </p>
+                      </>
                     )}
                     <p>Waiting for Player {isYouPlayer1 ? "2" : "1"}...</p>
                   </>
