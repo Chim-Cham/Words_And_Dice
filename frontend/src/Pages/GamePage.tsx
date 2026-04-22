@@ -176,6 +176,7 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
             setLevel(data.currentRound);
             setLevelComplete(false);
             setWaitingForOpponent(false);
+            hasInitializedPoints.current = false;
             setInputValue("");
             setTimeLeft(45);
             setIsWrong(false);
