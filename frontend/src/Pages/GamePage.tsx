@@ -24,6 +24,7 @@ type Player = {
 };
 
 export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
+
   const HINT_COST = 3;
   const hasInitializedPoints = useRef(false);
   const prevWordRef = useRef<string | null>(null);
@@ -92,7 +93,7 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
         console.error("Kunde inte skicka poäng", e);
       }
     } else {
-      const newScore = Math.max(0, playerPoints - 3);
+      const newScore = Math.max(0, playerPoints - 2);
       setPlayerPoints(newScore);
       playerPointsRef.current = newScore;
       setIsWrong(true);
@@ -147,7 +148,7 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
 
   useEffect(() => {
     if (timeLeft === 0 && !waitingForOpponent) {
-      const newScore = levelComplete ? playerPoints : Math.max(0, playerPoints - 2);
+      const newScore = levelComplete ? playerPoints : Math.max(0, playerPoints - 3);
       setPlayerPoints(newScore);
       playerPointsRef.current = newScore;
       setWaitingForOpponent(true);
@@ -194,10 +195,12 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
           }
 
           if (
-            !isYouPlayer1 &&
             data.targetWord &&
             (!currentWord || data.targetWord !== currentWord.word)
           ) {
+            setWaitingForOpponent(false); 
+            setInputValue("");              
+            setIsWrong(false);         
             setCurrentWord({
               word: data.targetWord,
               category: data.category,
