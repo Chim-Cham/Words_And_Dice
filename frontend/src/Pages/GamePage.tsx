@@ -66,21 +66,9 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
     "companies", "birds", "softwares", "games-console",
   ];
 
-  async function sendReady() {
-    try {
-      await fetch(`${API_URL}/api/games/${gameId}/ready/${playerId}`, {
-        method: "POST",
-      });
-    } catch (err) {
-      console.error("Kunde inte markera redo:", err);
-    }
-  }
-
   async function handleConfirmWord() {
     const guess = inputValue.trim().toUpperCase();
     if (guess.length === 0) {
-      setWaitingForOpponent(true);
-      await sendReady();
       return;
     }
 
@@ -90,7 +78,9 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
       playerPointsRef.current = newScore;
       setLevelComplete(true);
       setIsWrong(false);
-      setWaitingForOpponent(true);
+      setTimeout(() => {
+        setWaitingForOpponent(true);
+      }, 1000);
       try {
         await fetch(
           `${API_URL}/api/players/${playerId}/submit-round?newScore=${newScore}`,
@@ -124,6 +114,11 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
         if (response.ok) {
           const data = await response.json();
           setPlayers(data);
+
+          const me = data.find((p: Player) => p.id === playerId);
+          if (me) {
+            setPlayerPoints(me.score);
+          }
         }
       } catch (err) {
         console.error("Kunde inte hämta spelare:", err);
@@ -228,11 +223,12 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
       .map((_, i) => i)
       .filter((i) => !alreadyRevealed.has(i));
     if (hidden.length === 0) return;
+
     const pick = hidden[Math.floor(Math.random() * hidden.length)];
     setRevealedIndices((prev) => [...prev, pick]);
-    const newScore = playerPoints - currentWord!.length;
-    setPlayerPoints(newScore);
-    playerPointsRef.current = newScore;
+
+    setPlayerPoints(prev => prev - currentWord!.length);
+    playerPointsRef.current = playerPointsRef.current - currentWord!.length;
   }
 
   function getLevelRange(level: number): { min: number; max: number } {
