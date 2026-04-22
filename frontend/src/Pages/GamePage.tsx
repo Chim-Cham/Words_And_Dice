@@ -24,6 +24,7 @@ type Player = {
 };
 
 export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
+  const hasInitializedPoints = useRef(false);
   const prevWordRef = useRef<string | null>(null);
   const [showInstructions, setShowInstructions] = useState(false);
   const [players, setPlayers] = useState<Player[]>([]);
@@ -117,12 +118,11 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
 
           const me = data.find((p: Player) => p.id === playerId);
           if (me) {
-            if (me.score !== playerPointsRef.current && playerPointsRef.current === 0) {
-              // First sync — accept server score
+            if (!hasInitializedPoints.current) {
+              hasInitializedPoints.current = true;
               setPlayerPoints(me.score);
               playerPointsRef.current = me.score;
             } else if (me.score === playerPointsRef.current) {
-              // No local changes — keep in sync
               setPlayerPoints(me.score);
             }
           }
