@@ -116,8 +116,15 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
           setPlayers(data);
 
           const me = data.find((p: Player) => p.id === playerId);
-          if (me && me.score === playerPointsRef.current) {
-            setPlayerPoints(me.score);
+          if (me) {
+            if (me.score !== playerPointsRef.current && playerPointsRef.current === 0) {
+              // First sync — accept server score
+              setPlayerPoints(me.score);
+              playerPointsRef.current = me.score;
+            } else if (me.score === playerPointsRef.current) {
+              // No local changes — keep in sync
+              setPlayerPoints(me.score);
+            }
           }
         }
       } catch (err) {
