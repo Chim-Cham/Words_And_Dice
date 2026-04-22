@@ -152,7 +152,7 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
       playerPointsRef.current = newScore;
       setWaitingForOpponent(true);
       fetch(
-        `${API_URL}/api/players/${playerId}/submit-round?newScore=${playerPoints}`,
+        `${API_URL}/api/players/${playerId}/submit-round?newScore=${newScore}`,
         { method: "POST" },
       ).catch((e) => console.error(e));
     }
