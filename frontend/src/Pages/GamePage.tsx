@@ -92,7 +92,7 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
         console.error("Kunde inte skicka poäng", e);
       }
     } else {
-      const newScore = Math.max(0, playerPoints - 5);
+      const newScore = Math.max(0, playerPoints - 3);
       setPlayerPoints(newScore);
       playerPointsRef.current = newScore;
       setIsWrong(true);
@@ -147,7 +147,7 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
 
   useEffect(() => {
     if (timeLeft === 0 && !waitingForOpponent) {
-      const newScore = levelComplete ? playerPoints : playerPoints - 5;
+      const newScore = levelComplete ? playerPoints : Math.max(0, playerPoints - 2);
       setPlayerPoints(newScore);
       playerPointsRef.current = newScore;
       setWaitingForOpponent(true);
@@ -571,6 +571,8 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
                 Try to guess the hidden word one letter at a time!
                 <br />
                 If you guess a letter wrong, you lose points.
+                <br />
+                if you don't guess, you lose points.
               </p>
             </div>
           )}
