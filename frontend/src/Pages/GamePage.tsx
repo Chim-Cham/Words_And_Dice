@@ -172,6 +172,7 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
             sessionStorage.removeItem(`revealedIndices_${playerId}`);
             sessionStorage.removeItem(`wordSlots_${playerId}`);
             sessionStorage.removeItem(`currentWord_${playerId}`);
+            sessionStorage.setItem(`roundReset_${playerId}`, "true");
           }
 
           if (
@@ -239,6 +240,7 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
         if (gameRes.ok) {
           const gameData = await gameRes.json();
           if (gameData.targetWord && gameData.currentRound === level) {
+            setRevealedIndices([]);
             setCurrentWord({
               word: gameData.targetWord,
               category: gameData.category,
@@ -318,21 +320,19 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
     const savedRevealed = sessionStorage.getItem(`revealedIndices_${playerId}`);
 
     const parsedSlots = savedSlots ? JSON.parse(savedSlots) : [];
-    if (savedWord === currentWord.word && savedDice && parsedSlots.length === currentWord.word.length) {
+    const wasReset = sessionStorage.getItem(`roundReset_${playerId}`) === "true";
+    if (savedWord === currentWord.word && savedDice && parsedSlots.length === currentWord.word.length && !wasReset) {
       setWordSlots(parsedSlots);
       setDiceIndices(JSON.parse(savedDice));
       setRevealedIndices(savedRevealed ? JSON.parse(savedRevealed) : []);
     }
-
     else {
+      sessionStorage.removeItem(`roundReset_${playerId}`);
       const slots = generateWordSlots(currentWord.word);
       setWordSlots(slots);
-      // Only place dice on hidden slots
       const hiddenIndices = slots.map((s, i) => s === "" ? i : -1).filter(i => i !== -1);
       const shuffled = [...hiddenIndices].sort(() => Math.random() - 0.5);
       setDiceIndices(shuffled.slice(0, Math.min(2, shuffled.length)));
-      //remove before main push
-      console.log("word:", currentWord.word, "diceIndices:", shuffled.slice(0, Math.min(2, shuffled.length)), "wordSlots:", slots);
       setRevealedIndices([]);
     }
   }, [currentWord]);
