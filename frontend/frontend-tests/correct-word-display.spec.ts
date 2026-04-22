@@ -19,6 +19,10 @@ test.describe('Correct Word Display Spec', () => {
       });
     });
 
+    await page.route('**/api/players/*/submit-round*', async (route) => {
+      await route.fulfill({ status: 200, contentType: 'application/json', body: '{}' });
+    });
+
     await page.route(`**/api/games/${MOCK_GAME_ID}`, async (route) => {
       await route.fulfill({
         status: 200,
@@ -54,6 +58,9 @@ test.describe('Correct Word Display Spec', () => {
     });
 
     // Navigerar och join:ar ett spel (yippie)
+    await page.addInitScript(() => {
+      sessionStorage.setItem('timeLeft_player-123', '5');
+    });
     await page.goto('http://localhost:5173');
     await page.getByPlaceholder('Username').fill('TestSpelaren');
     await page.getByRole('button', { name: 'Join game' }).click();
@@ -62,34 +69,20 @@ test.describe('Correct Word Display Spec', () => {
   });
 
   test('should reveal word after wrong guess and time runs out', async ({ page }) => {
-    // Kollar så att vi är på gamepage:n
     await expect(page.getByText('Category: animals')).toBeVisible();
 
-    // Installerar klocka om det inte redan finns
-    try {
-      await page.clock.install();
-    } catch (e) {
-      // already installed
-    }
-
-    // Gissar fel med vilje 
+    // Gissar fel med vilje
     const input = page.getByPlaceholder('Type the word here...');
     await input.fill('WRONG');
     await input.press('Enter');
 
-    // Bekräftar att "Wrong Answer" visas på skärmen
     await expect(page.getByText(/Wrong answer/i)).toBeVisible();
 
-    // Spolar fram tiden med 40 sekunder först och sedan med 6 sekunder
-    await page.clock.runFor(40000);
-    await page.clock.runFor(6000);
+    // Wait for the real timer to expire (5s + buffer)
+    await expect(page.locator('.status-box')).toContainText('Time is up!', { timeout: 8000 });
 
-    // Bekräftar att "Time is up" texten visas
-    await expect(page.getByText('Time is up!')).toBeVisible();
-
-    // Kollar efter CSS klassen och grejs-o-mojs
     const revealedContainer = page.locator('.revealed-word-text');
-    await expect(revealedContainer).toBeVisible();
+    await expect(revealedContainer).toBeVisible({ timeout: 8000 });
     await expect(revealedContainer).toContainText(`The word was: ${MOCK_WORD.toUpperCase()}`);
   });
 });
