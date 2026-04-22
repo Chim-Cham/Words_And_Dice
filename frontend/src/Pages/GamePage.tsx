@@ -24,23 +24,48 @@ type Player = {
 };
 
 export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
+  const prevWordRef = useRef<string | null>(null);
   const [showInstructions, setShowInstructions] = useState(false);
   const [players, setPlayers] = useState<Player[]>([]);
-  const [timeLeft, setTimeLeft] = useState(45); //change here if we need to have a longer display time
-  //const [gameInfo, setGameInfo] = useState<any>(null);
-
-  // State för att hålla koll på poäng och gissningar
-  const [level, setLevel] = useState(1);
+  const [timeLeft, setTimeLeft] = useState(() => {
+    const saved = sessionStorage.getItem(`timeLeft_${playerId}`);
+    return saved ? parseInt(saved) : 45;
+  });
+  const [waitingForOpponent, setWaitingForOpponent] = useState(() => {
+    return sessionStorage.getItem(`waitingForOpponent_${playerId}`) === "true";
+  });
+  const [level, setLevel] = useState(() => {
+    const saved = sessionStorage.getItem(`level_${playerId}`);
+    return saved ? parseInt(saved) : 1;
+  });
   const [levelComplete, setLevelComplete] = useState(false);
   const [playerPoints, setPlayerPoints] = useState(0);
   const playerPointsRef = useRef(0);
   const [inputValue, setInputValue] = useState("");
   const [isWrong, setIsWrong] = useState(false);
-  const [waitingForOpponent, setWaitingForOpponent] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const [diceIndices, setDiceIndices] = useState<number[]>(() => {
+    const saved = sessionStorage.getItem(`diceIndices_${playerId}`);
+    return saved ? JSON.parse(saved) : [];
+  });
+  const [revealedIndices, setRevealedIndices] = useState<number[]>(() => {
+    const saved = sessionStorage.getItem(`revealedIndices_${playerId}`);
+    return saved ? JSON.parse(saved) : [];
+  });
+  const [currentWord, setCurrentWord] = useState<ApiWord | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [wordSlots, setWordSlots] = useState<string[]>(() => {
+    const saved = sessionStorage.getItem(`wordSlots_${playerId}`);
+    return saved ? JSON.parse(saved) : [];
+  });
+  const [rolling, setRolling] = useState(true);
 
-  // Kontrollerar spelarens gissning mot det rätta svaret.
-  // Ger +5 poäng vid rätt svar annars markeras fel.
+  const categories = [
+    "brainrot", "countries", "capitals", "sports", "animals",
+    "programming_languages", "games", "games-pc", "games-mobile",
+    "companies", "birds", "softwares", "games-console",
+  ];
+
   async function handleConfirmWord() {
     const guess = inputValue.trim().toUpperCase();
     if (currentWord && guess === currentWord.word.toUpperCase()) {
@@ -50,24 +75,6 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
       setLevelComplete(true);
       setIsWrong(false);
       setWaitingForOpponent(true);
-
-      try {
-        await fetch(
-          `${API_URL}/api/players/${playerId}/submit-round?newScore=${newScore}`,
-          {
-            method: "POST",
-            // headers: { "Content-Type": "application/json" },
-            // body: JSON.stringify(newScore)
-          },
-        );
-      } catch (e) {
-        console.error("Kunde inte skicka poäng", e);
-      }
-    } else {
-      const newScore = Math.max(0, playerPoints - 5);
-      setPlayerPoints(newScore);
-      setIsWrong(true);
-
       try {
         await fetch(
           `${API_URL}/api/players/${playerId}/submit-round?newScore=${newScore}`,
@@ -76,8 +83,23 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
       } catch (e) {
         console.error("Kunde inte skicka poäng", e);
       }
+    } else {
+      const newScore = Math.max(0, playerPoints - 5);
+      setPlayerPoints(newScore);
+      playerPointsRef.current = newScore;
+      setIsWrong(true);
     }
   }
+
+  useEffect(() => {
+    sessionStorage.setItem(`timeLeft_${playerId}`, String(timeLeft));
+    sessionStorage.setItem(`waitingForOpponent_${playerId}`, String(waitingForOpponent));
+    sessionStorage.setItem(`level_${playerId}`, String(level));
+    sessionStorage.setItem(`diceIndices_${playerId}`, JSON.stringify(diceIndices));
+    sessionStorage.setItem(`revealedIndices_${playerId}`, JSON.stringify(revealedIndices));
+    sessionStorage.setItem(`wordSlots_${playerId}`, JSON.stringify(wordSlots));
+    sessionStorage.setItem(`currentWord_${playerId}`, currentWord?.word ?? "");
+  }, [timeLeft, waitingForOpponent, level, diceIndices, revealedIndices, wordSlots, currentWord, playerId]);
 
   useEffect(() => {
     const fetchPlayers = async () => {
@@ -87,7 +109,7 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
           const data = await response.json();
           setPlayers(data);
           const me = data.find((p: Player) => p.id === playerId);
-          if (me && playerPointsRef.current === 0 && me.score > 0) {
+          if (me && !waitingForOpponent && me.score > playerPointsRef.current) {
             setPlayerPoints(me.score);
             playerPointsRef.current = me.score;
           }
@@ -99,9 +121,8 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
     fetchPlayers();
     const interval = setInterval(fetchPlayers, 1000);
     return () => clearInterval(interval);
-  }, [gameId]);
+  }, [gameId, waitingForOpponent]);
 
-  //count down logic for timer.
   useEffect(() => {
     if (timeLeft <= 0 || waitingForOpponent) return;
     const timerId = setInterval(() => {
@@ -115,11 +136,7 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
       setWaitingForOpponent(true);
       fetch(
         `${API_URL}/api/players/${playerId}/submit-round?newScore=${playerPoints}`,
-        {
-          method: "POST",
-          // headers: { "Content-Type": "application/json" },
-          // body: JSON.stringify(playerPoints)
-        },
+        { method: "POST" },
       ).catch((e) => console.error(e));
     }
   }, [timeLeft, waitingForOpponent, playerId, playerPoints]);
@@ -131,40 +148,12 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
   const isYouPlayer1 = player1?.id === playerId;
   const isYouPlayer2 = player2?.id === playerId;
 
-  // Hämtar alla möjliga ord från API:et
-  const [currentWord, setCurrentWord] = useState<ApiWord | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [wordSlots, setWordSlots] = useState<string[]>([]);
-  const [rolling, setRolling] = useState(true);
-  const [diceIndices, setDiceIndices] = useState<number[]>([]);
-  const [revealedIndices, setRevealedIndices] = useState<number[]>([]);
-  // Det som tar fram ett random ord
-  // Kategorier som matchar externa API:et
-  const categories = [
-    "brainrot",
-    "countries",
-    "capitals",
-    "sports",
-    "animals",
-    "programming_languages",
-    "games",
-    "games-pc",
-    "games-mobile",
-    "companies",
-    "wordle",
-    "birds",
-    "softwares",
-    "games-console",
-  ];
-
-  //send word to database
   useEffect(() => {
     const syncGame = async () => {
       try {
         const res = await fetch(`${API_URL}/api/games/${gameId}`);
         if (res.ok) {
           const data = await res.json();
-          //setGameInfo(data);
 
           if (data.currentRound && data.currentRound > level) {
             setLevel(data.currentRound);
@@ -174,9 +163,18 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
             setTimeLeft(45);
             setIsWrong(false);
             setLoading(true);
+            setRevealedIndices([]);
+            setCurrentWord(null);
+            sessionStorage.removeItem(`timeLeft_${playerId}`);
+            sessionStorage.removeItem(`waitingForOpponent_${playerId}`);
+            sessionStorage.removeItem(`level_${playerId}`);
+            sessionStorage.removeItem(`diceIndices_${playerId}`);
+            sessionStorage.removeItem(`revealedIndices_${playerId}`);
+            sessionStorage.removeItem(`wordSlots_${playerId}`);
+            sessionStorage.removeItem(`currentWord_${playerId}`);
+            sessionStorage.setItem(`roundReset_${playerId}`, "true");
           }
 
-          // Om du är Player 2 och ordet har dykt upp i databasen
           if (
             !isYouPlayer1 &&
             data.targetWord &&
@@ -198,27 +196,17 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
     return () => clearInterval(interval);
   }, [gameId, isYouPlayer1, currentWord, level]);
 
-  // Tar fram två random bokstäver
   function generateWordSlots(word: string) {
-    const letters = word.toUpperCase().split("");
-
-    const revealedIndexes = new Set<number>();
-    while (revealedIndexes.size < 2) {
-      revealedIndexes.add(Math.floor(Math.random() * letters.length));
-    }
-
-    return letters.map((letter, index) =>
-      revealedIndexes.has(index) ? letter : "",
-    );
-  }
-  function randomIndices(slots: string[]) {
-    const indices = slots.map((_, i) => i);
-    indices.sort(() => Math.random() - 0.5);
-    return indices.slice(0, 2);
+    return word.toUpperCase().split("").map(() => "");
   }
 
   function reroll() {
-    setDiceIndices(randomIndices(wordSlots));
+    const alreadyRevealed = new Set([...revealedIndices]);
+    const hiddenIndices = wordSlots
+      .map((s, i) => (s === "" && !alreadyRevealed.has(i) ? i : -1))
+      .filter(i => i !== -1);
+    const shuffled = [...hiddenIndices].sort(() => Math.random() - 0.5);
+    setDiceIndices(shuffled.slice(0, Math.min(2, shuffled.length)));
     setRolling(true);
     setTimeout(() => setRolling(false), 1400);
   }
@@ -231,19 +219,41 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
     if (hidden.length === 0) return;
     const pick = hidden[Math.floor(Math.random() * hidden.length)];
     setRevealedIndices((prev) => [...prev, pick]);
-    const newScore = playerPoints - wordLength;
+    const newScore = playerPoints - currentWord!.length;
     setPlayerPoints(newScore);
     playerPointsRef.current = newScore;
-    // needs a separate score-only endpoint (e.g. PATCH /api/players/{id}/score) that updates score without setting IsRoundReady=true
-    /* fetch(`http://localhost:5164/api/players/${playerId}/submit-round?newScore=${newScore}`, {
-      method: "POST"
-     }).catch(e => console.error("Kunde inte uppdatera poäng efter hint", e));*/
+  }
+
+  function getLevelRange(level: number): { min: number; max: number } {
+    if (level <= 5) return { min: 3, max: 4 };
+    if (level <= 10) return { min: 5, max: 5 };
+    if (level <= 15) return { min: 6, max: 6 };
+    if (level <= 20) return { min: 6, max: 7 };
+    return { min: 7, max: 12 };
   }
 
   useEffect(() => {
     if (!isYouPlayer1) return;
     async function loadWord() {
-      // Provar kategorier i slumpmässig ordning tills ett ord hittas för aktuellt level
+      try {
+        const gameRes = await fetch(`${API_URL}/api/games/${gameId}`);
+        if (gameRes.ok) {
+          const gameData = await gameRes.json();
+          if (gameData.targetWord && gameData.currentRound === level) {
+            setRevealedIndices([]);
+            setCurrentWord({
+              word: gameData.targetWord,
+              category: gameData.category,
+              length: gameData.targetWord.length,
+            });
+            setLoading(false);
+            return;
+          }
+        }
+      } catch (err) {
+        console.error("Failed to check existing word:", err);
+      }
+
       const shuffled = [...categories].sort(() => Math.random() - 0.5);
       for (const cat of shuffled) {
         try {
@@ -251,14 +261,15 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
           if (!res.ok) continue;
           const data = await res.json();
           if (!data.word) continue;
-
+          const wordLen = data.word.length;
+          const { min, max } = getLevelRange(level);
+          if (wordLen < min || wordLen > max) continue;
           const newWord = {
             word: data.word,
             category: data.category,
             length: data.word.length,
           };
           setCurrentWord(newWord);
-
           await fetch(`${API_URL}/api/games/${gameId}/word`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -273,29 +284,22 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
       console.error("Could not fetch a word for any category.");
       setLoading(false);
     }
-
     loadWord();
-  }, [isYouPlayer1, level]);
+  }, [isYouPlayer1, level, gameId]);
 
   useEffect(() => {
     if (!isYouPlayer1 || players.length < 2) return;
 
     const p1Ready = players[0]?.isRoundReady;
     const p2Ready = players[1]?.isRoundReady;
-
     const hasWinner = players[0]?.score >= 100 || players[1]?.score >= 100;
     const isLastRound = level >= 25;
 
     if (p1Ready && p2Ready && !isTransitioning) {
-      if (p1Ready && p2Ready && !isTransitioning) {
-        if (hasWinner || isLastRound) {
-          return;
-        }
-      }
-
+      if (hasWinner || isLastRound) return;
       setIsTransitioning(true);
       fetch(`${API_URL}/api/games/${gameId}/next-round`, { method: "POST" })
-        .then(() => setTimeout(() => setIsTransitioning(false), 2000)) // Pausa låset i 2s
+        .then(() => setTimeout(() => setIsTransitioning(false), 2000))
         .catch((err) => {
           console.error(err);
           setIsTransitioning(false);
@@ -304,16 +308,36 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
   }, [players, isYouPlayer1, isTransitioning, gameId, level]);
 
   useEffect(() => {
-    if (currentWord) {
+    //remove before main push
+    console.log("currentWord effect - word:", currentWord?.word, "prev:", prevWordRef.current, "savedWord:", sessionStorage.getItem(`currentWord_${playerId}`));
+    if (!currentWord) return;
+    if (currentWord.word === prevWordRef.current) return;
+    prevWordRef.current = currentWord.word;
+
+    const savedWord = sessionStorage.getItem(`currentWord_${playerId}`);
+    const savedDice = sessionStorage.getItem(`diceIndices_${playerId}`);
+    const savedSlots = sessionStorage.getItem(`wordSlots_${playerId}`);
+    const savedRevealed = sessionStorage.getItem(`revealedIndices_${playerId}`);
+
+    const parsedSlots = savedSlots ? JSON.parse(savedSlots) : [];
+    const wasReset = sessionStorage.getItem(`roundReset_${playerId}`) === "true";
+    if (savedWord === currentWord.word && savedDice && parsedSlots.length === currentWord.word.length && !wasReset) {
+      setWordSlots(parsedSlots);
+      setDiceIndices(JSON.parse(savedDice));
+      setRevealedIndices(savedRevealed ? JSON.parse(savedRevealed) : []);
+    }
+    else {
+      sessionStorage.removeItem(`roundReset_${playerId}`);
       const slots = generateWordSlots(currentWord.word);
       setWordSlots(slots);
-      setDiceIndices(randomIndices(slots));
+      const hiddenIndices = slots.map((s, i) => s === "" ? i : -1).filter(i => i !== -1);
+      const shuffled = [...hiddenIndices].sort(() => Math.random() - 0.5);
+      setDiceIndices(shuffled.slice(0, Math.min(2, shuffled.length)));
       setRevealedIndices([]);
     }
   }, [currentWord]);
-
+ 
   useEffect(() => {
-    // ← and this
     const t = setTimeout(() => setRolling(false), 1400);
     return () => clearTimeout(t);
   }, []);
@@ -338,7 +362,6 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
   }
 
   const wordLength = currentWord.length;
-  //const correctAnswer = currentWord.word.toUpperCase();
   const category = currentWord.category;
   const isPlayerTurn = true;
   const maxScore = 5;
@@ -378,7 +401,6 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
       <main className="game-layout">
         <aside className="game-side">
           <div className="info-card">
-            {/* <h2>Player 1</h2> */}
             <h2 className="player-name">
               {player1?.playerName || "Loading..."}
             </h2>
@@ -391,7 +413,6 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
           <div className="info-card hint-card">
             <h3>Hint</h3>
             <p>Hint cost: {wordLength} points</p>
-
             <button
               className="secondary-button"
               type="button"
@@ -400,32 +421,36 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
             >
               Buy Hint
             </button>
-
             {!canUseHint && (
               <p className="clue-warning">
                 You don't have any points yet, Earn points in the game first.
               </p>
             )}
           </div>
-          <button
-            className="back-button reroll-button"
-            type="button"
-            onClick={reroll}
-          >
+          {/*remove before main push*/}
+          <button className="reroll-button" type="button" onClick={reroll}>
             Reroll
+          </button>
+          {/*remove before main push*/}
+          <button
+            className="point-button"
+            type="button"
+            onClick={() => {
+              const newScore = playerPoints + 10;
+              setPlayerPoints(newScore);
+              playerPointsRef.current = newScore;
+            }}
+          >
+            +10 pts
           </button>
         </aside>
 
         <section className="game-center">
           <div className="top-row">
             <div className="category-box">Category: {category}</div>
-
-            <div
-              className={`timer-box ${timeLeft <= 10 ? "timer-warning" : ""}`}
-            >
+            <div className={`timer-box ${timeLeft <= 10 ? "timer-warning" : ""}`}>
               Time: {timeLeft}s
             </div>
-
             <div className="status-box">
               {timeLeft === 0
                 ? "Time is up!"
@@ -440,6 +465,7 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
               word={currentWord.word.toUpperCase()}
               diceIndices={diceIndices}
               hintIndices={revealedIndices}
+              wordSlots={wordSlots}
               rolling={rolling}
             />
 
@@ -494,7 +520,6 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
               onClick={handleConfirmWord}
               disabled={waitingForOpponent || inputValue.trim() === ""}
             >
-              {/* </button><button className="primary-button" type="button" disabled={isInputDisabled}> */}
               Confirm Word
             </button>
 
@@ -535,7 +560,6 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
 
         <aside className="game-side">
           <div className="info-card">
-            {/* <h2>Player 2</h2> */}
             <h2 className="player-name">
               {player2?.playerName || "Waiting..."}
             </h2>
