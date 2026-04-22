@@ -206,16 +206,16 @@ export function GamePage({ gameId, playerId, onBack }: GamePageProps) {
     return word.toUpperCase().split("").map(() => "");
   }
 
-  function reroll() {
-    const alreadyRevealed = new Set([...revealedIndices]);
-    const hiddenIndices = wordSlots
-      .map((s, i) => (s === "" && !alreadyRevealed.has(i) ? i : -1))
-      .filter(i => i !== -1);
-    const shuffled = [...hiddenIndices].sort(() => Math.random() - 0.5);
-    setDiceIndices(shuffled.slice(0, Math.min(2, shuffled.length)));
-    setRolling(true);
-    setTimeout(() => setRolling(false), 1400);
-  }
+  // function reroll() {
+  //   const alreadyRevealed = new Set([...revealedIndices]);
+  //   const hiddenIndices = wordSlots
+  //     .map((s, i) => (s === "" && !alreadyRevealed.has(i) ? i : -1))
+  //     .filter(i => i !== -1);
+  //   const shuffled = [...hiddenIndices].sort(() => Math.random() - 0.5);
+  //   setDiceIndices(shuffled.slice(0, Math.min(2, shuffled.length)));
+  //   setRolling(true);
+  //   setTimeout(() => setRolling(false), 1400);
+  // }
 
   function buyHint() {
     const alreadyRevealed = new Set([...diceIndices, ...revealedIndices]);
